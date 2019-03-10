@@ -4,11 +4,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Spv extends CI_Controller {
 	function __construct(){
 		parent::__construct();
-		$this->load->model(array('View_of','M_item_reture','M_news'));
+		$this->load->model(array('View_of','M_item_reture','M_news', 'M_stock'));
 	}
 
 	public function index()
 	{
+		date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+		$now = date('Y-m');
+		$reture = $this->M_stock->retur_perbulan($now)->result();
+		$kirim = $this->M_stock->pengiriman_perbulan($now)->result();
+		$barang = $this->M_stock->total_barang_now()->row()->jumlah;
+		// $grafik_barang = $this->M_stock->get_barang($now);
+
+		$data['jumlah_reture'] = count($reture);
+		$data['jumlah_kirim'] = count($kirim);
+		$data['total_barang'] = $barang;
+		// $data['grafik_barang'] = $grafik_barang;
+
+		$data['now'] = $now;
 		$data['content'] = 'spv/dasboard';
 		$this->load->view('template', $data);
 	}
@@ -105,6 +118,8 @@ public function accepting_item_reture()
 											$sql= "UPDATE tbl_stok SET JUMLAH = JUMLAH - $y WHERE ID_BARANG = '$x' AND ID_STORE = '$z'";
 											echo $sql;
 											$result = $this->db->query($sql);
+
+
 										}
 							  		
 							  }
@@ -131,6 +146,27 @@ public function accepting_item_reture()
 									";
 
 							$result = $this->db->query($sql);
+
+
+
+					date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+					$now = date('Y-m-d');
+
+					$get_id = $this->M_stock->ambil_id()->result();
+					$jumlah_stok = $this->M_stock->ambil_jumlah($ID_BARANG, $ID_STORE)->row()->JUMLAH;
+					$STOK_AWAL = $jumlah_stok + $cetak1['JUMLAH_RETURE'];
+
+					$data_mutasi = array (
+						'ID_TOKO'			=> $cetak1['TOKO_RETURE'],
+						'ID_BARANG'			=> $cetak1['NAMA_RETURE'],
+						'STOK_AWAL'		  	=> $STOK_AWAL,
+						'JUMLAH'		  	=> $cetak1['JUMLAH_RETURE'],
+						'STOK_AKHIR'		=> $jumlah_stok,
+						'CREATED_AT'		=> $now,
+						'STATUS'			=> 3
+					);
+
+					$this->db->insert('tbl_mutasi', $data_mutasi);
 			redirect("Spv/accepting_item_reture");
 
 	}
@@ -150,6 +186,72 @@ public function detail_item_reture($KODE_RETURE) {
 
 	public function view_monthly_report()
 	{
-		$this->load->view('template');
+		$data['content'] = 'Spv/view_monthly_report';
+		$this->load->view('template', $data);
+	}	
+
+
+	public function excel_report()
+	{
+		$tgl = $this->input->post('tgl');
+		$query = $this->M_excel->export($tgl); 
+		if(!$query)
+            return false;
+		
+		 
+        $this->load->library('excel');
+        // $this->load->library('PHPExcel/IOFactory');		
+		$object = new PHPExcel();
+ 
+        $object->setActiveSheetIndex(0);
+		 // Field names in the first row
+        $fields = array("No","Nama Produk", "Stok Awal", "Barang Masuk", "Sell Out", "Retur", "Stok Akhir");
+        $col = 0;
+        foreach ($fields as $field)
+        {
+            $object->getActiveSheet()->setCellValueByColumnAndRow($col, 1, $field);
+            $col++;
+        }
+		
+		// Fetching the table data
+        $cek_stat = $this->M_excel->export_satu($tgl)->result();
+  //       foreach ($cek->result_array() as $d) {
+		//  		$cek_stat	= $d['status'];
+		// }
+
+        $no = 1;
+        $row = 2;
+        
+
+		foreach ($cek_stat as $data) {
+
+			if ($data->status == "4") {
+				
+				continue;
+			}
+
+			$object->getActiveSheet()->setCellValueByColumnAndRow(0, $row, $no++);     
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $row, $data->nama_item);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $row, $data->stok_awal);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $row, ($data->status == "1") ? $data->jumlah : NULL);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $row, ($data->status == "2") ? $data->jumlah : NULL);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $row, ($data->status == "3") ? $data->jumlah : NULL);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(6, $row, $data->stok_akhir);
+	        	
+			$row++;
+		 
+		// 
+		}
+        
+		
+		// $objPHPExcel->setActiveSheetIndex(0);
+ 
+        $object_writer = PHPExcel_IOFactory::createWriter($object, 'Excel5');
+        // Sending headers to force the user to download the file
+        header('Content-Type: application/vnd.ms-excel');
+        header('Content-Disposition: attachment;filename="Mutasi_'.date('dMy').'.xls"');
+ 
+        $object_writer->save('php://output');
+       
 	}	
 }

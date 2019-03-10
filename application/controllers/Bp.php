@@ -8,7 +8,20 @@ class Bp extends CI_Controller {
 	}
 
 	public function index()
-	{
+	{	
+		$nip = $this->session->userdata('nip');
+		$user = $this->M_stock->select_toko($nip)->row()->ID_TOKO_JAGA;
+		date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+		$now = date('Y-m');
+		$reture = $this->M_stock->retur_perbulan_bp($now, $nip)->result();
+		$kirim = $this->M_stock->pengiriman_perbulan_bp($now, $nip)->result();
+		$barang = $this->M_stock->total_barang_now_bp($user)->row()->jumlah;
+
+		$data['jumlah_reture'] = count($reture);
+		$data['jumlah_kirim'] = count($kirim);
+		$data['total_barang'] = $barang;
+		
+		$data['now'] = $now;
 		$data['content'] = 'bp/dasboard';
 		$this->load->view('template', $data);
 	}
@@ -238,7 +251,7 @@ class Bp extends CI_Controller {
 					
 							$ID_BARANG	= $cetak1['NAMA_PENGIRIMAN'];
 							$ID_STORE   = $cetak1['TOKO_PENGIRIMAN'];
-							echo 'id barang'.$ID_BARANG;
+							// echo 'id barang'.$ID_BARANG;
 
 							 $test = $this->db->query("SELECT * FROM tbl_stok WHERE ID_BARANG = '$ID_BARANG' AND ID_STORE = '$ID_STORE'");
 
@@ -258,9 +271,10 @@ class Bp extends CI_Controller {
 
 										if ($x <> NULL AND $x <> '') {
 											$sql= "UPDATE tbl_stok SET JUMLAH = JUMLAH + $y WHERE ID_BARANG = '$x' AND ID_STORE = '$z'";
-											echo $sql;
+											// echo $sql;
 											$result = $this->db->query($sql);
 										}
+
 							  		
 							  }else{
 									
@@ -284,6 +298,27 @@ class Bp extends CI_Controller {
 									";
 
 							$result = $this->db->query($sql);
+
+					date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+					$now = date('Y-m-d');
+
+					$get_id = $this->M_stock->ambil_id()->result();
+					$jumlah_stok = $this->M_stock->ambil_jumlah($ID_BARANG, $ID_STORE)->row()->JUMLAH;
+					$STOK_AWAL = $jumlah_stok - $cetak1['JUMLAH_PENGIRIMAN'];
+
+					$data_mutasi = array (
+						'ID_TOKO'			=> $cetak1['TOKO_PENGIRIMAN'],
+						'ID_BARANG'			=> $cetak1['NAMA_PENGIRIMAN'],
+						'STOK_AWAL'		  	=> $STOK_AWAL,
+						'JUMLAH'		  	=> $cetak1['JUMLAH_PENGIRIMAN'],
+						'STOK_AKHIR'		=> $jumlah_stok,
+						'CREATED_AT'		=> $now,
+						'STATUS'			=> 1
+					);
+
+					$this->db->insert('tbl_mutasi', $data_mutasi);
+			
+			
 			redirect("Bp/accepting_item_delivery");
 
 	}
@@ -609,7 +644,7 @@ public function view_stock()
 			$checkitem = $this->input->post('item');
 			$data = array (
 
-				'ID_LAPORAN'		=> $this->input->post('ai_lapor'),
+				'ID_LAPORAN'	=> $this->input->post('ai_lapor'),
 				'ITEM_JUAL' 	=> $this->input->post('item'),
 				'HARGA_JUAL' 	=> $this->input->post('harga'),
 				'JUMLAH_JUAL' 	=> $this->input->post('jumlah'),
@@ -630,7 +665,31 @@ public function view_stock()
 					if ($checkjumlah > $jstok) {
 						echo "string";
 					}else{
-						$this->db->insert('tbl_isi_laporan', $data);
+						// $this->db->insert('tbl_isi_laporan', $data);
+
+						// ------
+
+						$jumlahstok = $jstok - $checkjumlah;
+						$this->M_stock->update_stok($jumlahstok,$brg,$tok);
+						date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+						$now = date('Y-m-d');
+						$get_id = $this->M_stock->ambil_id()->result();
+						$jumlah_stok = $this->M_stock->ambil_jumlah($brg, $tok)->row()->JUMLAH;
+						$STOK_AWAL = $jumlah_stok + $checkjumlah;
+
+						$data_mutasi = array (
+							'ID_TOKO'			=> $tok,
+							'ID_BARANG'			=> $brg,
+							'STOK_AWAL'		  	=> $STOK_AWAL,
+							'JUMLAH'		  	=> $checkjumlah,
+							'STOK_AKHIR'		=> $jumlah_stok,
+							'CREATED_AT'		=> $now,
+							'STATUS'			=> 2
+						);
+
+						$this->db->insert('tbl_mutasi', $data_mutasi);
+
+						// --
 					}
 
 			}else {
@@ -659,6 +718,9 @@ public function view_stock()
 		$data['cetak1'] = $this->M_sellout->view_item_sellout2($kode_lapor);
 
 		$data['content'] = 'Bp/add_item_sellout';
+
+
+
 		$this->load->view('template', $data);
 
 	}

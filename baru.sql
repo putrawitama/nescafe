@@ -1,13 +1,15 @@
 -- phpMyAdmin SQL Dump
--- version 4.5.1
--- http://www.phpmyadmin.net
+-- version 4.7.9
+-- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Nov 29, 2018 at 04:16 PM
--- Server version: 10.1.10-MariaDB
--- PHP Version: 7.0.4
+-- Waktu pembuatan: 10 Mar 2019 pada 08.44
+-- Versi server: 10.1.31-MariaDB
+-- Versi PHP: 5.6.34
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
+START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -23,7 +25,7 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_berita`
+-- Struktur dari tabel `tbl_berita`
 --
 
 CREATE TABLE `tbl_berita` (
@@ -34,7 +36,7 @@ CREATE TABLE `tbl_berita` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_berita`
+-- Dumping data untuk tabel `tbl_berita`
 --
 
 INSERT INTO `tbl_berita` (`ID_BERITA`, `JUDUL_BERITA`, `ISI_BERITA`, `FOTO_BERITA`) VALUES
@@ -44,7 +46,7 @@ INSERT INTO `tbl_berita` (`ID_BERITA`, `JUDUL_BERITA`, `ISI_BERITA`, `FOTO_BERIT
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_isi_laporan`
+-- Struktur dari tabel `tbl_isi_laporan`
 --
 
 CREATE TABLE `tbl_isi_laporan` (
@@ -56,16 +58,18 @@ CREATE TABLE `tbl_isi_laporan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_isi_laporan`
+-- Dumping data untuk tabel `tbl_isi_laporan`
 --
 
 INSERT INTO `tbl_isi_laporan` (`AI_ISI_LAPORAN`, `ID_LAPORAN`, `ITEM_JUAL`, `HARGA_JUAL`, `JUMLAH_JUAL`) VALUES
-(1, 1, 'RA', 90000, 5);
+(1, 1, 'RA', 90000, 5),
+(8, 16, 'PIC', 25000, 10),
+(10, 17, 'COR', 3000, 10);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_item`
+-- Struktur dari tabel `tbl_item`
 --
 
 CREATE TABLE `tbl_item` (
@@ -78,10 +82,11 @@ CREATE TABLE `tbl_item` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_item`
+-- Dumping data untuk tabel `tbl_item`
 --
 
 INSERT INTO `tbl_item` (`ID_ITEM`, `NAMA_ITEM`, `HARGA_ITEM`, `FOTO_ITEM`, `AI_PRODUK`, `AKTIF`) VALUES
+('', '', 0, '.jpg', 3, 'n'),
 ('CAL', 'CAFÉ AU LAIT', 119900, 'CAL.jpg', 1, 'n'),
 ('COR', 'CORTADO', 119900, 'COR.jpg', 1, 'y'),
 ('DR', 'DROP RED', 3699000, 'DR.jpg', 1, 'y'),
@@ -103,7 +108,7 @@ INSERT INTO `tbl_item` (`ID_ITEM`, `NAMA_ITEM`, `HARGA_ITEM`, `FOTO_ITEM`, `AI_P
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_kategori`
+-- Struktur dari tabel `tbl_kategori`
 --
 
 CREATE TABLE `tbl_kategori` (
@@ -112,7 +117,7 @@ CREATE TABLE `tbl_kategori` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_kategori`
+-- Dumping data untuk tabel `tbl_kategori`
 --
 
 INSERT INTO `tbl_kategori` (`ID_KATEGORI`, `NAMA_KATEGORI`) VALUES
@@ -124,7 +129,7 @@ INSERT INTO `tbl_kategori` (`ID_KATEGORI`, `NAMA_KATEGORI`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_laporan`
+-- Struktur dari tabel `tbl_laporan`
 --
 
 CREATE TABLE `tbl_laporan` (
@@ -134,16 +139,53 @@ CREATE TABLE `tbl_laporan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_laporan`
+-- Dumping data untuk tabel `tbl_laporan`
 --
 
 INSERT INTO `tbl_laporan` (`AI_LAPORAN`, `LAPORAN_DATE`, `TOKO_JUAL`) VALUES
-(1, '2018-11-26', 2);
+(1, '2018-11-26', 2),
+(16, '2019-02-28', 7),
+(17, '2019-03-02', 7),
+(18, '2019-03-04', 7),
+(19, '2019-03-05', 7),
+(20, '2019-03-07', 7);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_pegawai`
+-- Struktur dari tabel `tbl_mutasi`
+--
+
+CREATE TABLE `tbl_mutasi` (
+  `id_mutasi` int(11) NOT NULL,
+  `id_toko` int(11) NOT NULL,
+  `id_barang` varchar(50) NOT NULL,
+  `stok_awal` int(11) NOT NULL,
+  `jumlah` int(11) NOT NULL,
+  `stok_akhir` int(11) NOT NULL,
+  `created_at` date NOT NULL,
+  `status` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Dumping data untuk tabel `tbl_mutasi`
+--
+
+INSERT INTO `tbl_mutasi` (`id_mutasi`, `id_toko`, `id_barang`, `stok_awal`, `jumlah`, `stok_akhir`, `created_at`, `status`) VALUES
+(1, 7, 'PIC', 10, 10, 20, '2019-03-01', 4),
+(2, 7, 'PIC', 20, 10, 30, '2019-03-02', 1),
+(3, 7, 'COR', 20, 10, 10, '2019-03-02', 2),
+(4, 7, 'PIC', 30, 10, 20, '2019-03-02', 3),
+(5, 7, 'PIC', 20, 10, 30, '2019-03-04', 1),
+(6, 7, 'RA', 88, 50, 38, '2019-03-04', 3),
+(7, 7, 'PIC', 30, 30, 0, '2019-03-04', 2),
+(8, 7, 'OW', 30, 10, 20, '2019-03-05', 2),
+(9, 7, 'COR', 10, 10, 0, '2019-03-07', 2);
+
+-- --------------------------------------------------------
+
+--
+-- Struktur dari tabel `tbl_pegawai`
 --
 
 CREATE TABLE `tbl_pegawai` (
@@ -164,7 +206,7 @@ CREATE TABLE `tbl_pegawai` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_pegawai`
+-- Dumping data untuk tabel `tbl_pegawai`
 --
 
 INSERT INTO `tbl_pegawai` (`NIP`, `NAMA_PEG`, `PASSWORD`, `ALAMAT_PEG`, `EMAIL_PEG`, `TLP_PEG`, `TGL_MASUK`, `JENIS_KELAMIN`, `TGL_LAHIR`, `FOTO_PEG`, `STATUS_LOGIN`, `LEVEL`, `AKTIF`, `COOKIE`) VALUES
@@ -185,7 +227,7 @@ INSERT INTO `tbl_pegawai` (`NIP`, `NAMA_PEG`, `PASSWORD`, `ALAMAT_PEG`, `EMAIL_P
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_pengiriman`
+-- Struktur dari tabel `tbl_pengiriman`
 --
 
 CREATE TABLE `tbl_pengiriman` (
@@ -200,33 +242,89 @@ CREATE TABLE `tbl_pengiriman` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_pengiriman`
+-- Dumping data untuk tabel `tbl_pengiriman`
 --
 
 INSERT INTO `tbl_pengiriman` (`ID_PENGIRIMAN`, `KODE_PENGIRIMAN`, `NAMA_PENGIRIMAN`, `JUMLAH_PENGIRIMAN`, `TGL_PENGIRIMAN`, `TOKO_PENGIRIMAN`, `BP_PENGIRIMAN`, `STATUS_PENGIRIMAN`) VALUES
-(59, 'MSD-SBY-DO-2018-0001', 'LB', 3, '2018-11-09', 7, 1020, 1),
+(59, 'MSD-SBY-DO-2018-0001', 'LB', 3, '2018-11-09', 7, 1020, 2),
 (90, 'MSD-SBY-DO-2018-0003', 'RA', 2, '2018-11-08', 7, 1020, 2),
 (91, 'MSD-SBY-DO-2018-0004', 'CAL', 1, '2018-11-08', 7, 1020, 2),
-(92, 'MSD-SBY-DO-2018-0002', 'DR', 3, '2018-11-08', 7, 1020, 1),
+(92, 'MSD-SBY-DO-2018-0002', 'DR', 3, '2018-11-08', 7, 1020, 2),
 (151, 'MSD-SBY-DO-2018-0005', NULL, 0, '2018-11-16', 2, 88888, 2),
 (152, 'MSD-SBY-DO-2018-0010', NULL, 0, '2018-11-16', 2, 22222, 2),
 (153, 'MSD-SBY-DO-2018-0011', NULL, 0, '2018-11-16', 2, 22222, 2),
 (154, 'MSD-SBY-DO-2018-0013', NULL, 0, '2018-11-16', 2, 1020, 2),
 (155, 'MSD-SBY-DO-2018-0012', NULL, 0, '2018-11-16', 2, 22222, 2),
 (156, 'MSD-SBY-DO-2018-0014', NULL, 0, '2018-11-16', 2, 22222, 2),
-(158, 'MSD-SBY-DO-2018-0015', 'DR', 3, '2018-11-16', 2, 22222, 1),
+(158, 'MSD-SBY-DO-2018-0015', 'DR', 3, '2018-11-16', 2, 22222, 2),
 (159, 'MSD-SBY-DO-2018-0016', 'CAL', 4, '2018-11-19', 2, 22222, 2),
 (160, 'MSD-SBY-DO-2018-0017', 'GB', 5, '2018-11-19', 2, 22222, 2),
 (161, 'MSD-SBY-DO-2018-0018', NULL, 0, '2018-11-19', 2, 22222, 2),
 (162, 'MSD-SBY-DO-2018-0018', 'PIC', 4, '2018-11-19', 2, 22222, 2),
 (163, 'MSD-SBY-DO-2018-0019', 'DR', 3, '2018-11-26', 7, 55555, 2),
 (164, 'MSD-SBY-DO-2018-0019', 'LB', 4, '2018-11-26', 7, 55555, 2),
-(165, 'MSD-SBY-DO-2018-0019', 'RA', 6, '2018-11-26', 7, 55555, 2);
+(165, 'MSD-SBY-DO-2018-0019', 'RA', 6, '2018-11-26', 7, 55555, 2),
+(166, 'MSD-SBY-DO-2019-0020', NULL, 0, '2019-01-29', 1, 7777, 1),
+(167, 'MSD-SBY-DO-2019-0021', NULL, 0, '2019-02-27', 1, 22222, 1),
+(168, 'MSD-SBY-DO-2019-0021', 'PIC', 1, '2019-02-27', 1, 22222, 1),
+(169, 'MSD-SBY-DO-2019-0022', NULL, 0, '2019-02-27', 7, 1020, 2),
+(170, 'MSD-SBY-DO-2019-0022', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(171, 'MSD-SBY-DO-2019-0023', NULL, 0, '2019-02-28', 7, 1020, 2),
+(172, 'MSD-SBY-DO-2019-0023', 'OW', 20, '2019-02-27', 7, 1020, 2),
+(173, 'MSD-SBY-DO-2019-0024', NULL, 0, '2019-02-28', 7, 1020, 2),
+(174, 'MSD-SBY-DO-2019-0024', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(175, 'MSD-SBY-DO-2019-0025', NULL, 0, '2019-02-28', 7, 1020, 2),
+(176, 'MSD-SBY-DO-2019-0025', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(177, 'MSD-SBY-DO-2019-0026', NULL, 0, '2019-02-28', 7, 1020, 2),
+(178, 'MSD-SBY-DO-2019-0026', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(179, 'MSD-SBY-DO-2019-0027', NULL, 0, '2019-02-28', 7, 1020, 2),
+(180, 'MSD-SBY-DO-2019-0027', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(181, 'MSD-SBY-DO-2019-0028', NULL, 0, '2019-02-28', 7, 1020, 2),
+(182, 'MSD-SBY-DO-2019-0028', 'PIC', 12, '2019-02-27', 7, 1020, 2),
+(183, 'MSD-SBY-DO-2019-0029', NULL, 0, '2019-02-27', 7, 1020, 2),
+(184, 'MSD-SBY-DO-2019-0029', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(185, 'MSD-SBY-DO-2019-0030', NULL, 0, '2019-02-26', 7, 1020, 2),
+(186, 'MSD-SBY-DO-2019-0030', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(187, 'MSD-SBY-DO-2019-0031', NULL, 0, '2019-02-26', 7, 1020, 2),
+(188, 'MSD-SBY-DO-2019-0031', 'OW', 10, '2019-02-27', 7, 1020, 2),
+(189, 'MSD-SBY-DO-2019-0032', NULL, 0, '2019-02-27', 7, 22222, 2),
+(190, 'MSD-SBY-DO-2019-0032', 'PIC', 10, '2019-02-27', 7, 22222, 2),
+(191, 'MSD-SBY-DO-2019-0033', NULL, 0, '2019-02-28', 1, 1020, 1),
+(192, 'MSD-SBY-DO-2019-0033', 'CAL', 12, '2019-02-27', 1, 1020, 1),
+(193, 'MSD-SBY-DO-2019-0034', NULL, 0, '2019-02-28', 7, 1020, 2),
+(194, 'MSD-SBY-DO-2019-0034', 'PIC', 12, '2019-02-27', 7, 1020, 2),
+(195, 'MSD-SBY-DO-2019-0035', NULL, 0, '2019-02-28', 7, 1020, 2),
+(196, 'MSD-SBY-DO-2019-0035', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(197, 'MSD-SBY-DO-2019-0036', NULL, 0, '2019-02-28', 7, 1020, 2),
+(198, 'MSD-SBY-DO-2019-0036', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(199, 'MSD-SBY-DO-2019-0037', NULL, 0, '2019-02-28', 7, 1020, 2),
+(200, 'MSD-SBY-DO-2019-0037', 'RA', 10, '2019-02-27', 7, 1020, 2),
+(201, 'MSD-SBY-DO-2019-0038', NULL, 0, '2019-02-28', 7, 1020, 2),
+(202, 'MSD-SBY-DO-2019-0038', 'COR', 10, '2019-02-27', 7, 1020, 2),
+(203, 'MSD-SBY-DO-2019-0039', NULL, 0, '2019-02-28', 7, 1020, 2),
+(204, 'MSD-SBY-DO-2019-0039', 'PIC', 10, '2019-02-27', 7, 1020, 2),
+(205, 'MSD-SBY-DO-2019-0040', NULL, 0, '2019-02-28', 7, 1020, 2),
+(206, 'MSD-SBY-DO-2019-0040', 'PIC', 20, '2019-02-28', 7, 1020, 2),
+(207, 'MSD-SBY-DO-2019-0041', NULL, 0, '2019-02-28', 7, 1020, 2),
+(208, 'MSD-SBY-DO-2019-0041', 'PIC', 40, '2019-02-28', 7, 1020, 2),
+(209, 'MSD-SBY-DO-2019-0042', 'PIC', 10, '2019-02-28', 7, 1020, 3),
+(210, 'MSD-SBY-DO-2019-0043', 'PIC', 10, '2019-02-28', 7, 1020, 3),
+(211, 'MSD-SBY-DO-2019-0044', 'PIC', 10, '2019-02-28', 7, 1020, 3),
+(212, 'MSD-SBY-DO-2019-0045', NULL, 0, '2019-02-28', 7, 1020, 2),
+(213, 'MSD-SBY-DO-2019-0045', 'PIC', 20, '2019-02-28', 7, 1020, 2),
+(214, 'MSD-SBY-DO-2019-0046', 'PIC', 10, '2019-02-28', 7, 1020, 3),
+(215, 'MSD-SBY-DO-2019-0047', 'PIC', 10, '2019-03-01', 7, 1020, 3),
+(216, 'MSD-SBY-DO-2019-0048', NULL, 0, '2019-03-01', 7, 1020, 2),
+(217, 'MSD-SBY-DO-2019-0049', 'PIC', 10, '2019-03-01', 7, 1020, 3),
+(218, 'MSD-SBY-DO-2019-0050', NULL, 0, '2019-03-02', 7, 1020, 2),
+(219, 'MSD-SBY-DO-2019-0050', 'PIC', 10, '2019-03-02', 7, 1020, 2),
+(220, 'MSD-SBY-DO-2019-0051', NULL, 0, '2019-03-04', 7, 1020, 2),
+(221, 'MSD-SBY-DO-2019-0051', 'PIC', 10, '2019-03-04', 7, 1020, 2);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_penjaga`
+-- Struktur dari tabel `tbl_penjaga`
 --
 
 CREATE TABLE `tbl_penjaga` (
@@ -236,7 +334,7 @@ CREATE TABLE `tbl_penjaga` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_penjaga`
+-- Dumping data untuk tabel `tbl_penjaga`
 --
 
 INSERT INTO `tbl_penjaga` (`AI_JAGA`, `NIP_JAGA`, `ID_TOKO_JAGA`) VALUES
@@ -257,7 +355,7 @@ INSERT INTO `tbl_penjaga` (`AI_JAGA`, `NIP_JAGA`, `ID_TOKO_JAGA`) VALUES
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_penjualan`
+-- Struktur dari tabel `tbl_penjualan`
 --
 
 CREATE TABLE `tbl_penjualan` (
@@ -274,7 +372,7 @@ CREATE TABLE `tbl_penjualan` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_permintaan`
+-- Struktur dari tabel `tbl_permintaan`
 --
 
 CREATE TABLE `tbl_permintaan` (
@@ -289,7 +387,7 @@ CREATE TABLE `tbl_permintaan` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_permintaan`
+-- Dumping data untuk tabel `tbl_permintaan`
 --
 
 INSERT INTO `tbl_permintaan` (`ID_PERMINTAAN`, `KODE_PERMINTAAN`, `NAMA_PERMINTAAN`, `JUMLAH_PERMINTAAN`, `TGL_PERMINTAAN`, `TOKO_PERMINTAAN`, `BP_PERMINTAAN`, `STATUS_PERMINTAAN`) VALUES
@@ -321,12 +419,24 @@ INSERT INTO `tbl_permintaan` (`ID_PERMINTAAN`, `KODE_PERMINTAAN`, `NAMA_PERMINTA
 (76, 'NDG-SBY-REQ-2018-0016', NULL, 0, '2018-11-25', 7, 55555, 2),
 (77, 'NDG-SBY-REQ-2018-0016', 'DR', 3, '2018-11-25', 7, 55555, 2),
 (78, 'NDG-SBY-REQ-2018-0016', 'LB', 4, '2018-11-25', 7, 55555, 2),
-(79, 'NDG-SBY-REQ-2018-0016', 'RA', 6, '2018-11-25', 7, 55555, 2);
+(79, 'NDG-SBY-REQ-2018-0016', 'RA', 6, '2018-11-25', 7, 55555, 2),
+(80, 'NDG-SBY-REQ-2019-0017', NULL, 0, '2019-02-28', 7, 1020, 1),
+(81, 'NDG-SBY-REQ-2019-0018', NULL, 0, '2019-02-28', 7, 1020, 2),
+(82, 'NDG-SBY-REQ-2019-0018', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(83, 'NDG-SBY-REQ-2019-0019', NULL, 0, '2019-02-28', 7, 1020, 2),
+(84, 'NDG-SBY-REQ-2019-0019', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(85, 'NDG-SBY-REQ-2019-0020', NULL, 0, '2019-02-28', 7, 1020, 2),
+(86, 'NDG-SBY-REQ-2019-0020', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(87, 'NDG-SBY-REQ-2019-0021', NULL, 0, '2019-03-01', 7, 1020, 2),
+(88, 'NDG-SBY-REQ-2019-0021', 'PIC', 10, '2019-03-01', 7, 1020, 2),
+(89, 'NDG-SBY-REQ-2019-0022', NULL, 0, '2019-03-01', 7, 1020, 2),
+(90, 'NDG-SBY-REQ-2019-0022', 'PIC', 10, '2019-03-01', 7, 1020, 2),
+(91, 'NDG-SBY-REQ-2019-0023', NULL, 0, '2019-03-07', 7, 1020, 1);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_reture`
+-- Struktur dari tabel `tbl_reture`
 --
 
 CREATE TABLE `tbl_reture` (
@@ -341,7 +451,7 @@ CREATE TABLE `tbl_reture` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_reture`
+-- Dumping data untuk tabel `tbl_reture`
 --
 
 INSERT INTO `tbl_reture` (`ID_RETURE`, `KODE_RETURE`, `NAMA_RETURE`, `JUMLAH_RETURE`, `TGL_RETURE`, `TOKO_RETURE`, `BP_RETURE`, `STATUS_RETURE`) VALUES
@@ -357,12 +467,23 @@ INSERT INTO `tbl_reture` (`ID_RETURE`, `KODE_RETURE`, `NAMA_RETURE`, `JUMLAH_RET
 (55, 'NDG-SBY-RET-2018-0001', 'RA', 2, '2018-11-19', 2, 22222, 1),
 (56, 'NDG-SBY-RET-2018-0001', 'DR', 1, '2018-11-19', 2, 22222, 1),
 (57, 'NDG-SBY-RET-2018-0010', NULL, 0, '2018-11-19', 2, 22222, 1),
-(58, 'NDG-SBY-RET-2018-0010', 'GR', 1, '2018-11-19', 2, 22222, 1);
+(58, 'NDG-SBY-RET-2018-0010', 'GR', 1, '2018-11-19', 2, 22222, 1),
+(59, 'NDG-SBY-RET-2019-0011', NULL, 0, '2019-02-28', 7, 1020, 1),
+(60, 'NDG-SBY-RET-2019-0012', NULL, 0, '2019-02-28', 7, 1020, 2),
+(61, 'NDG-SBY-RET-2019-0012', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(62, 'NDG-SBY-RET-2019-0013', NULL, 0, '2019-02-28', 7, 1020, 2),
+(63, 'NDG-SBY-RET-2019-0013', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(64, 'NDG-SBY-RET-2019-0014', NULL, 0, '2019-02-28', 7, 1020, 2),
+(65, 'NDG-SBY-RET-2019-0014', 'PIC', 10, '2019-02-28', 7, 1020, 2),
+(66, 'NDG-SBY-RET-2019-0015', NULL, 0, '2019-03-02', 7, 1020, 2),
+(67, 'NDG-SBY-RET-2019-0015', 'PIC', 10, '2019-03-02', 7, 1020, 2),
+(68, 'NDG-SBY-RET-2019-0016', NULL, 0, '2019-03-04', 7, 1020, 2),
+(69, 'NDG-SBY-RET-2019-0016', 'RA', 50, '2019-03-04', 7, 1020, 2);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_stok`
+-- Struktur dari tabel `tbl_stok`
 --
 
 CREATE TABLE `tbl_stok` (
@@ -373,7 +494,7 @@ CREATE TABLE `tbl_stok` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_stok`
+-- Dumping data untuk tabel `tbl_stok`
 --
 
 INSERT INTO `tbl_stok` (`ID_STOK`, `JUMLAH`, `ID_BARANG`, `ID_STORE`) VALUES
@@ -383,17 +504,20 @@ INSERT INTO `tbl_stok` (`ID_STOK`, `JUMLAH`, `ID_BARANG`, `ID_STORE`) VALUES
 (122, 5, 'PIC', 2),
 (123, 8, 'GR', 2),
 (124, 2, 'MB', 2),
-(125, 3, 'DR', 2),
+(125, 6, 'DR', 2),
 (126, 4, 'CAL', 2),
-(127, 3, 'DR', 7),
-(128, 4, 'LB', 7),
-(129, 8, 'RA', 7),
-(130, 1, 'CAL', 7);
+(127, 6, 'DR', 7),
+(128, 7, 'LB', 7),
+(129, 38, 'RA', 7),
+(130, 1, 'CAL', 7),
+(132, 20, 'OW', 7),
+(134, 0, 'COR', 7),
+(135, 0, 'PIC', 7);
 
 -- --------------------------------------------------------
 
 --
--- Table structure for table `tbl_toko`
+-- Struktur dari tabel `tbl_toko`
 --
 
 CREATE TABLE `tbl_toko` (
@@ -407,7 +531,7 @@ CREATE TABLE `tbl_toko` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
--- Dumping data for table `tbl_toko`
+-- Dumping data untuk tabel `tbl_toko`
 --
 
 INSERT INTO `tbl_toko` (`ID_TOKO`, `NAMA_TOKO`, `ALAMAT_TOKO`, `TLP_TOKO`, `KOTA_TOKO`, `EMAIL_TOKO`, `STATUS_TOKO`) VALUES
@@ -422,13 +546,13 @@ INSERT INTO `tbl_toko` (`ID_TOKO`, `NAMA_TOKO`, `ALAMAT_TOKO`, `TLP_TOKO`, `KOTA
 --
 
 --
--- Indexes for table `tbl_berita`
+-- Indeks untuk tabel `tbl_berita`
 --
 ALTER TABLE `tbl_berita`
   ADD PRIMARY KEY (`ID_BERITA`);
 
 --
--- Indexes for table `tbl_isi_laporan`
+-- Indeks untuk tabel `tbl_isi_laporan`
 --
 ALTER TABLE `tbl_isi_laporan`
   ADD PRIMARY KEY (`AI_ISI_LAPORAN`),
@@ -436,32 +560,38 @@ ALTER TABLE `tbl_isi_laporan`
   ADD UNIQUE KEY `ITEM_JUAL` (`ITEM_JUAL`);
 
 --
--- Indexes for table `tbl_item`
+-- Indeks untuk tabel `tbl_item`
 --
 ALTER TABLE `tbl_item`
   ADD PRIMARY KEY (`ID_ITEM`),
   ADD KEY `AI_PRODUK` (`AI_PRODUK`);
 
 --
--- Indexes for table `tbl_kategori`
+-- Indeks untuk tabel `tbl_kategori`
 --
 ALTER TABLE `tbl_kategori`
   ADD PRIMARY KEY (`ID_KATEGORI`);
 
 --
--- Indexes for table `tbl_laporan`
+-- Indeks untuk tabel `tbl_laporan`
 --
 ALTER TABLE `tbl_laporan`
   ADD PRIMARY KEY (`AI_LAPORAN`);
 
 --
--- Indexes for table `tbl_pegawai`
+-- Indeks untuk tabel `tbl_mutasi`
+--
+ALTER TABLE `tbl_mutasi`
+  ADD PRIMARY KEY (`id_mutasi`);
+
+--
+-- Indeks untuk tabel `tbl_pegawai`
 --
 ALTER TABLE `tbl_pegawai`
   ADD PRIMARY KEY (`NIP`);
 
 --
--- Indexes for table `tbl_pengiriman`
+-- Indeks untuk tabel `tbl_pengiriman`
 --
 ALTER TABLE `tbl_pengiriman`
   ADD PRIMARY KEY (`ID_PENGIRIMAN`),
@@ -470,7 +600,7 @@ ALTER TABLE `tbl_pengiriman`
   ADD KEY `NAMA_PENGIRIMAN` (`NAMA_PENGIRIMAN`);
 
 --
--- Indexes for table `tbl_penjaga`
+-- Indeks untuk tabel `tbl_penjaga`
 --
 ALTER TABLE `tbl_penjaga`
   ADD PRIMARY KEY (`AI_JAGA`),
@@ -478,7 +608,7 @@ ALTER TABLE `tbl_penjaga`
   ADD KEY `ID_TOKO_JAGA` (`ID_TOKO_JAGA`);
 
 --
--- Indexes for table `tbl_penjualan`
+-- Indeks untuk tabel `tbl_penjualan`
 --
 ALTER TABLE `tbl_penjualan`
   ADD PRIMARY KEY (`AI_PENJUALAN`),
@@ -487,7 +617,7 @@ ALTER TABLE `tbl_penjualan`
   ADD KEY `BP_PENJUALAN` (`BP_PENJUALAN`);
 
 --
--- Indexes for table `tbl_permintaan`
+-- Indeks untuk tabel `tbl_permintaan`
 --
 ALTER TABLE `tbl_permintaan`
   ADD PRIMARY KEY (`ID_PERMINTAAN`),
@@ -497,7 +627,7 @@ ALTER TABLE `tbl_permintaan`
   ADD KEY `TOKO_PERMINTAAN` (`TOKO_PERMINTAAN`);
 
 --
--- Indexes for table `tbl_reture`
+-- Indeks untuk tabel `tbl_reture`
 --
 ALTER TABLE `tbl_reture`
   ADD PRIMARY KEY (`ID_RETURE`),
@@ -506,7 +636,7 @@ ALTER TABLE `tbl_reture`
   ADD KEY `BP_RETURE` (`BP_RETURE`);
 
 --
--- Indexes for table `tbl_stok`
+-- Indeks untuk tabel `tbl_stok`
 --
 ALTER TABLE `tbl_stok`
   ADD PRIMARY KEY (`ID_STOK`),
@@ -514,84 +644,100 @@ ALTER TABLE `tbl_stok`
   ADD KEY `ID_BARANG` (`ID_BARANG`);
 
 --
--- Indexes for table `tbl_toko`
+-- Indeks untuk tabel `tbl_toko`
 --
 ALTER TABLE `tbl_toko`
   ADD PRIMARY KEY (`ID_TOKO`);
 
 --
--- AUTO_INCREMENT for dumped tables
+-- AUTO_INCREMENT untuk tabel yang dibuang
 --
 
 --
--- AUTO_INCREMENT for table `tbl_berita`
+-- AUTO_INCREMENT untuk tabel `tbl_berita`
 --
 ALTER TABLE `tbl_berita`
   MODIFY `ID_BERITA` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
 --
--- AUTO_INCREMENT for table `tbl_isi_laporan`
+-- AUTO_INCREMENT untuk tabel `tbl_isi_laporan`
 --
 ALTER TABLE `tbl_isi_laporan`
-  MODIFY `AI_ISI_LAPORAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `AI_ISI_LAPORAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
 --
--- AUTO_INCREMENT for table `tbl_laporan`
+-- AUTO_INCREMENT untuk tabel `tbl_laporan`
 --
 ALTER TABLE `tbl_laporan`
-  MODIFY `AI_LAPORAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `AI_LAPORAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+
 --
--- AUTO_INCREMENT for table `tbl_pengiriman`
+-- AUTO_INCREMENT untuk tabel `tbl_mutasi`
+--
+ALTER TABLE `tbl_mutasi`
+  MODIFY `id_mutasi` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT untuk tabel `tbl_pengiriman`
 --
 ALTER TABLE `tbl_pengiriman`
-  MODIFY `ID_PENGIRIMAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=166;
+  MODIFY `ID_PENGIRIMAN` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=222;
+
 --
--- AUTO_INCREMENT for table `tbl_penjaga`
+-- AUTO_INCREMENT untuk tabel `tbl_penjaga`
 --
 ALTER TABLE `tbl_penjaga`
   MODIFY `AI_JAGA` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+
 --
--- AUTO_INCREMENT for table `tbl_penjualan`
+-- AUTO_INCREMENT untuk tabel `tbl_penjualan`
 --
 ALTER TABLE `tbl_penjualan`
   MODIFY `AI_PENJUALAN` int(11) NOT NULL AUTO_INCREMENT;
+
 --
--- AUTO_INCREMENT for table `tbl_permintaan`
+-- AUTO_INCREMENT untuk tabel `tbl_permintaan`
 --
 ALTER TABLE `tbl_permintaan`
-  MODIFY `ID_PERMINTAAN` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `ID_PERMINTAAN` int(1) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=92;
+
 --
--- AUTO_INCREMENT for table `tbl_reture`
+-- AUTO_INCREMENT untuk tabel `tbl_reture`
 --
 ALTER TABLE `tbl_reture`
-  MODIFY `ID_RETURE` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=59;
+  MODIFY `ID_RETURE` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=70;
+
 --
--- AUTO_INCREMENT for table `tbl_stok`
+-- AUTO_INCREMENT untuk tabel `tbl_stok`
 --
 ALTER TABLE `tbl_stok`
-  MODIFY `ID_STOK` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=131;
+  MODIFY `ID_STOK` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=136;
+
 --
--- AUTO_INCREMENT for table `tbl_toko`
+-- AUTO_INCREMENT untuk tabel `tbl_toko`
 --
 ALTER TABLE `tbl_toko`
   MODIFY `ID_TOKO` int(20) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
 --
--- Constraints for dumped tables
+-- Ketidakleluasaan untuk tabel pelimpahan (Dumped Tables)
 --
 
 --
--- Constraints for table `tbl_isi_laporan`
+-- Ketidakleluasaan untuk tabel `tbl_isi_laporan`
 --
 ALTER TABLE `tbl_isi_laporan`
   ADD CONSTRAINT `tbl_isi_laporan_ibfk_1` FOREIGN KEY (`ID_LAPORAN`) REFERENCES `tbl_laporan` (`AI_LAPORAN`),
   ADD CONSTRAINT `tbl_isi_laporan_ibfk_2` FOREIGN KEY (`ITEM_JUAL`) REFERENCES `tbl_item` (`ID_ITEM`);
 
 --
--- Constraints for table `tbl_item`
+-- Ketidakleluasaan untuk tabel `tbl_item`
 --
 ALTER TABLE `tbl_item`
   ADD CONSTRAINT `tbl_item_ibfk_1` FOREIGN KEY (`AI_PRODUK`) REFERENCES `tbl_kategori` (`ID_KATEGORI`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_pengiriman`
+-- Ketidakleluasaan untuk tabel `tbl_pengiriman`
 --
 ALTER TABLE `tbl_pengiriman`
   ADD CONSTRAINT `tbl_pengiriman_ibfk_3` FOREIGN KEY (`BP_PENGIRIMAN`) REFERENCES `tbl_pegawai` (`NIP`) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -599,14 +745,14 @@ ALTER TABLE `tbl_pengiriman`
   ADD CONSTRAINT `tbl_pengiriman_ibfk_5` FOREIGN KEY (`TOKO_PENGIRIMAN`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_penjaga`
+-- Ketidakleluasaan untuk tabel `tbl_penjaga`
 --
 ALTER TABLE `tbl_penjaga`
   ADD CONSTRAINT `tbl_penjaga_ibfk_1` FOREIGN KEY (`NIP_JAGA`) REFERENCES `tbl_pegawai` (`NIP`) ON DELETE NO ACTION ON UPDATE CASCADE,
   ADD CONSTRAINT `tbl_penjaga_ibfk_2` FOREIGN KEY (`ID_TOKO_JAGA`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_penjualan`
+-- Ketidakleluasaan untuk tabel `tbl_penjualan`
 --
 ALTER TABLE `tbl_penjualan`
   ADD CONSTRAINT `tbl_penjualan_ibfk_3` FOREIGN KEY (`BP_PENJUALAN`) REFERENCES `tbl_pegawai` (`NIP`) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -614,7 +760,7 @@ ALTER TABLE `tbl_penjualan`
   ADD CONSTRAINT `tbl_penjualan_ibfk_5` FOREIGN KEY (`TOKO_PENJUALAN`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_permintaan`
+-- Ketidakleluasaan untuk tabel `tbl_permintaan`
 --
 ALTER TABLE `tbl_permintaan`
   ADD CONSTRAINT `tbl_permintaan_ibfk_2` FOREIGN KEY (`BP_PERMINTAAN`) REFERENCES `tbl_pegawai` (`NIP`) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -622,7 +768,7 @@ ALTER TABLE `tbl_permintaan`
   ADD CONSTRAINT `tbl_permintaan_ibfk_5` FOREIGN KEY (`TOKO_PERMINTAAN`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_reture`
+-- Ketidakleluasaan untuk tabel `tbl_reture`
 --
 ALTER TABLE `tbl_reture`
   ADD CONSTRAINT `tbl_reture_ibfk_3` FOREIGN KEY (`BP_RETURE`) REFERENCES `tbl_pegawai` (`NIP`) ON DELETE NO ACTION ON UPDATE CASCADE,
@@ -630,11 +776,12 @@ ALTER TABLE `tbl_reture`
   ADD CONSTRAINT `tbl_reture_ibfk_5` FOREIGN KEY (`TOKO_RETURE`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 --
--- Constraints for table `tbl_stok`
+-- Ketidakleluasaan untuk tabel `tbl_stok`
 --
 ALTER TABLE `tbl_stok`
   ADD CONSTRAINT `tbl_stok_ibfk_1` FOREIGN KEY (`ID_STORE`) REFERENCES `tbl_toko` (`ID_TOKO`) ON DELETE NO ACTION ON UPDATE CASCADE,
   ADD CONSTRAINT `tbl_stok_ibfk_2` FOREIGN KEY (`ID_BARANG`) REFERENCES `tbl_item` (`ID_ITEM`) ON DELETE NO ACTION ON UPDATE CASCADE;
+COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
