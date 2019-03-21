@@ -128,4 +128,13 @@ public function view_all_stock($kode_toko)
 
     }
 
+    function update_mutasi($jumlahstok,$brg,$tok){   
+        $this->db->set('JUMLAH', $jumlahstok); //value that used to update column 
+        $this->db->set('JUMLAH', $jumlahstok);
+        $this->db->set('JUMLAH', $jumlahstok); 
+        $this->db->where('ID_BARANG', $brg);
+        $this->db->where('ID_STORE', $tok); //which row want to upgrade  
+        $this->db->update('tbl_stok');  //table name
+    }
+
 }

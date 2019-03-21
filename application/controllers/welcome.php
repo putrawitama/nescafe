@@ -4,7 +4,7 @@ class Welcome extends CI_Controller {
 
 	function __construct() {
 		parent::__construct();
-		$this->load->model('M_stock');
+		$this->load->model('M_sellout');
 		// // $this->load->helper('url');
 		$this->load->helper('form');
 		$this->load->library('session');
@@ -18,10 +18,14 @@ class Welcome extends CI_Controller {
 		// $cek = $this->M_excel->select_status();
 		$tgl = "2019-03";
 		$cek = "1";
-		$cek =$this->M_stock->coba_barang($tgl);
-		 $cek_stat = $cek;
+
+		$brg = "RA";
+		$toko = 25;
+		$cek_stok = $this->M_sellout->cek_jumlah($brg,$toko)->row()->JUMLAH_JUAL;
+		$cekstok = (int)$cek_stok;
+		 // $cek_stat = $cek;
 		echo "<pre>";
-		var_dump($cek_stat);
+		var_dump($cekstok);
 
 		// foreach ($cek_stat as $d) {
 		//  		$cek	= $d->status;

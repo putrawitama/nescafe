@@ -34,6 +34,17 @@
                     </div>
                   </div>
 
+                  <div class="form-group">
+                    <label for="inputEmail3" class="col-sm-2 control-label">Toko : </label>
+                    <div class="col-sm-8">
+                      <select name="ID_TOKO" class="form-control">
+                              <?php foreach($toko as $select){ ?>
+                            <option value="<?php echo $select->ID_TOKO ?>" > <?php echo $select->NAMA_TOKO ?> </option>
+                            <?php } ?>            
+                      </select>
+                    </div>
+                  </div>
+
                 </div>
                 <div class="box-footer">
                   <button type="submit" class="btn btn-info pull-right">Export</button>

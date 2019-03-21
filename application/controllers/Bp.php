@@ -465,7 +465,7 @@ public function view_stock()
 				$data = array (
 					'KODE_RETURE'		=> $kode_minta,
 					'NAMA_RETURE'		=> $this->input->post('item'),
-					'JUMLAH_RETURE'	=> $this->input->post('jumlah'),
+					'JUMLAH_RETURE'		=> $this->input->post('jumlah'),
 					'TGL_RETURE'		=> $tanggal,
 					'TOKO_RETURE'		=> $this->input->post('toko'),
 					'BP_RETURE'			=> $this->input->post('bp'),
@@ -522,7 +522,7 @@ public function view_stock()
 			}else {
 				$tanggal = date("Y-m-d");
 				$data = array (
-					'KODE_RETURE'			=> $kode_kirim,
+					'KODE_RETURE'		=> $kode_kirim,
 					'NAMA_RETURE'		=> $this->input->post('item'),
 					'JUMLAH_RETURE'		=> $this->input->post('jumlah'),
 					'TGL_RETURE'		=> $tanggal,
@@ -603,7 +603,7 @@ public function view_stock()
 			"SELECT * FROM tbl_penjaga
 			WHERE NIP_JAGA = '$usr'
 			LIMIT 1");
-			$jaga = $this->db->query("SELECT * FROM tbl_penjaga WHERE NIP_JAGA = '$usr' LIMIT 1");
+		$jaga = $this->db->query("SELECT * FROM tbl_penjaga WHERE NIP_JAGA = '$usr' LIMIT 1");
 			foreach ($jaga->result() as $key) {
 				$tok = $key->ID_TOKO_JAGA;
 			}
@@ -619,9 +619,11 @@ public function view_stock()
 		 $toko = $this->input->post('toko');
 
 		$check = $this->db->query("SELECT * FROM tbl_laporan WHERE LAPORAN_DATE = '$tgl' AND TOKO_JUAL = '$toko' LIMIT 1")->num_rows();
+		
 		if ($check == 1) {
 			echo "Tanggal Sudah pernah ditambahkan";
 			redirect('Bp/view_item_sellout');
+		
 		}else {
 			$data = array (
 				'LAPORAN_DATE'		=> $this->input->post('tgl'),
@@ -631,6 +633,54 @@ public function view_stock()
 			$this->db->insert('tbl_laporan', $data);
 			redirect('Bp/add_sellout_item/'."$tgl");
 		}
+
+	}
+
+	public function edit_item_sellout2($tanda)
+	{
+		$toko = $this->input->post('kode_item');
+		$kode_lapor = $this->input->post('code');
+
+		$data = array (
+
+				'ID_LAPORAN' 	=> $this->input->post('id_item'),
+				'ITEM_JUAL' 	=> $this->input->post('brg'),
+				'HARGA_JUAL' 	=> $this->input->post('harga'),
+				'JUMLAH_JUAL' 	=> $this->input->post('jumlah'),
+			);
+
+		$brg = $this->input->post('brg');
+		$jumlah_post = $this->input->post('jumlah');
+		$id_lapor = $this->input->post('id_item');
+
+		$cek_stok = $this->M_sellout->cekstok($brg, $toko)->row()->JUMLAH;
+		$cekstok = (int)$cek_stok;
+		
+		// echo $cekstok;
+
+		$cek_jumlah = $this->M_sellout->cek_jumlah($brg, $id_lapor)->row()->JUMLAH_JUAL;
+
+		if ($cek_jumlah > $jumlah_post) {
+			
+			$jumlah_update = $cek_jumlah - $jumlah_post;
+			$perbarui_stok = $cekstok + $jumlah_update;
+
+
+			$this->M_sellout->edit($tanda,$data);
+			$this->M_stock->update_stok($perbarui_stok, $data['ITEM_JUAL'], $toko);
+			// $this->M_stock->update_mutasi($perbarui_stok, $data['ITEM_JUAL'], $toko);
+		
+		} else if ($cek_jumlah < $jumlah_post) {
+			
+			$jumlah_update =  $jumlah_post - $cek_jumlah;
+			$perbarui_stok = $cekstok - $jumlah_update;
+
+			$this->M_sellout->edit($tanda,$data);
+			$this->M_stock->update_stok($perbarui_stok,$data['ITEM_JUAL'],$toko);
+		}
+
+		// $this->M_sellout->edit($tanda,$data);
+		redirect('Bp/add_sellout_item/'.$kode_lapor);
 
 	}
 
@@ -649,11 +699,13 @@ public function view_stock()
 				'HARGA_JUAL' 	=> $this->input->post('harga'),
 				'JUMLAH_JUAL' 	=> $this->input->post('jumlah'),
 			);
+			
 			$set_ai_lapor = $this->input->post('ai_lapor');
 			$brg = $this->input->post('item');
 			$tok = $this->input->post('toko');
 			$checkjumlah = $this->input->post('jumlah');
 			$check = $this->db->query("SELECT * FROM tbl_isi_laporan WHERE ID_LAPORAN = '$set_ai_lapor' AND ITEM_JUAL = '$checkitem'");
+			
 			if ($check->num_rows() == 0) {
 
 				$stock = $this->db->query("SELECT * FROM tbl_stok WHERE ID_BARANG = '$brg' AND ID_STORE = '$tok' LIMIT 1");
@@ -665,12 +717,15 @@ public function view_stock()
 					if ($checkjumlah > $jstok) {
 						echo "string";
 					}else{
-						// $this->db->insert('tbl_isi_laporan', $data);
+						$this->db->insert('tbl_isi_laporan', $data);
 
-						// ------
+						// --------- Update Stok --------
 
 						$jumlahstok = $jstok - $checkjumlah;
 						$this->M_stock->update_stok($jumlahstok,$brg,$tok);
+
+						// ------------------------------
+
 						date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
 						$now = date('Y-m-d');
 						$get_id = $this->M_stock->ambil_id()->result();
@@ -728,7 +783,7 @@ public function view_stock()
 	public function update_item_sellout($tgl_lapor,$kode_lapor)
 	{
 		$data['tanda'] = 0;
-		$data['code'] = $kode_lapor;
+		$data['code'] = $tgl_lapor;
 
 		$set = $this->db->query("SELECT * FROM tbl_laporan WHERE LAPORAN_DATE = '$kode_lapor'");
 		foreach ($set->result() as $print) {
@@ -743,12 +798,22 @@ public function view_stock()
 		foreach ($jaga->result() as $key) {
 			$tok = $key->ID_TOKO_JAGA;
 		}
+
+		$set = $this->db->query("SELECT * FROM tbl_laporan WHERE LAPORAN_DATE = '$kode_lapor'");
+		foreach ($set->result() as $print) {
+			$data['toko'] = $print->TOKO_JUAL;
+			$data['ai_lapor'] = $print->AI_LAPORAN;
+			$data['tgl_lapor'] = $print->LAPORAN_DATE;
+		}
+		
 		$data['itkat'] = $this->db->query("SELECT * FROM tbl_stok WHERE ID_STORE = '$tok' ");
 		$data['tanda'] = $kode_lapor;
-		$data['cetak1'] = $this->M_sellout->view_item_sellout2($kode_lapor);
+		$data['cetak1'] = $this->M_sellout->view_item_sellout2($tgl_lapor);
 		$data['content'] = 'Bp/update_item_sellout';
 		$this->load->view('template', $data);
 	}
+
+	
 
 	function cancel_sellout($id,$toko)
 	{
@@ -757,10 +822,23 @@ public function view_stock()
 		redirect('Bp/view_item_sellout');
 	}
 
-	public function hapus_item_sellout2($id,$kode_id)
+	public function hapus_item_sellout2($tgl,$ai_isi_lapor)
 	{
-		$this->db->delete('tbl_isi_laporan', array('AI_ISI_LAPORAN' => $id));
-		redirect('Bp/add_sellout_item/'.$kode_id);
+		$ambil_brg = $this->M_sellout->ambil_nama($ai_isi_lapor)->row()->ITEM_JUAL;
+		$usr = $this->session->userdata('nip');
+		$jaga = $this->db->query("SELECT * FROM tbl_penjaga WHERE NIP_JAGA = '$usr' LIMIT 1");
+		foreach ($jaga->result() as $key) {
+				$tok = $key->ID_TOKO_JAGA;
+		}
+		$cek = $this->M_sellout->cek($ai_isi_lapor)->row()->JUMLAH_JUAL;
+		$cek_stok = $this->M_sellout->cekstok($ambil_brg, $tok)->row()->JUMLAH;
+		$cekstok = (int)$cek_stok;
+
+		$jumlah_update = $cek_stok + $cek;
+		$this->M_stock->update_stok($jumlah_update,$ambil_brg,$tok);
+
+		$this->db->delete('tbl_isi_laporan', array('AI_ISI_LAPORAN' => $ai_isi_lapor));
+		redirect('Bp/add_sellout_item/'.$tgl);
 	}
 
 	public function export($tgl)

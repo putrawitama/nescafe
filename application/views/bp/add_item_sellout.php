@@ -1,8 +1,4 @@
-
-
-
-
-  <!-- Content Wrapper. Contains page content -->
+<!-- Content Wrapper. Contains page content -->
   <div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
@@ -20,7 +16,7 @@
     <!-- Main content -->
     <section class="content">
       <div class="row">
-<div class="col-md-4">
+    <div class="col-md-4">
           <!-- Horizontal Form -->
           <div class="box box-info">
             <form class="form-horizontal" action="<?= base_url('Bp/add_sellout_item/'.$code)?>"
@@ -106,19 +102,19 @@
           <?php foreach($cetak1 as $data1){?>
 
 
-            <!-- <?php
-              $hargatotal += $data1->HARGA;
-              $jumlahtotal += $data1->QTY;
-              $total += $data1->QTY*$data1->HARGA;
-              $tot = $data1->QTY*$data1->HARGA;
-            ?> -->
+            <?php
+              // $hargatotal += $data1->HARGA;
+              $jumlahtotal += $data1->JUMLAH_JUAL;
+              // $total += $data1->JUMLAH_JUAL*$data1->HARGA_JUAL;
+              // $tot = $data1->QTY*$data1->HARGA;
+            ?>
 
             <tr>
               <td><?= $data1->ITEM_JUAL ?></td>
               <td><?= $data1->HARGA_JUAL?></td>
               <td><?= $data1->JUMLAH_JUAL?></td>
               <td><a href="<?= base_url("Bp/update_item_sellout/$code/$data1->AI_ISI_LAPORAN")?>" class="btn btn-primary small">Edit</a>
-                  <a href="<?= base_url("Bp/hapus_item_sellout2/$data1->AI_ISI_LAPORAN/$code")?>" class="btn btn-danger small">Hapus</a></td>
+                  <a href="<?= base_url("Bp/hapus_item_sellout2/$code/$data1->AI_ISI_LAPORAN")?>" class="btn btn-danger small">Hapus</a></td>
             </tr>
 
         <?php } ?>
@@ -135,7 +131,7 @@
         </tfoot>
       </table>
 
-      <a href="<?php echo base_url(); ?>Bp/view_item_reture" class="btn btn-success pull-right">SAVE RETURE</a>
+      <a href="<?php echo base_url(); ?>Bp/view_item_sellout" class="btn btn-success pull-right">SAVE SELL OUT</a>
     </div>
 
     <!-- /.box-body -->

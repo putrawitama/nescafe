@@ -48,12 +48,13 @@ class M_excel extends CI_Model{
  		return $this->db->get();
 	}
 
-	public function export_satu($tgl)
+	public function export_satu($tgl,$ID_TOKO)
 	{
 		$this->db->select('a.stok_awal, a.jumlah, a.stok_akhir, a.created_at, b.nama_item, a.status');
  		$this->db->from('tbl_mutasi as a');
  		$this->db->join('tbl_item as b', 'a.id_barang = b.id_item');
  		$this->db->like('a.created_at', $tgl);
+ 		$this->db->where('id_toko', $ID_TOKO);
  		return $this->db->get();
 	}
 
@@ -65,5 +66,20 @@ class M_excel extends CI_Model{
  		return $rs_data;
 	}
 	
+	public function ambil_toko()
+	{
+		$this->db->select('ID_TOKO, NAMA_TOKO');
+ 		$this->db->from('tbl_toko');
+ 		return $this->db->get();
+	}
+
+	public function ambil_nama_toko($toko)
+	{
+		$this->db->select('NAMA_TOKO');
+ 		$this->db->from('tbl_toko');
+ 		$this->db->where('ID_TOKO', $toko);
+ 		return $this->db->get();
+	}
+
 
 }

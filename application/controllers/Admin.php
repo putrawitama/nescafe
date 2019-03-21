@@ -672,6 +672,7 @@ public function hapus_item_delivery2($id,$kode_id)
 
 	public function view_monthly_report()
 	{
+		$data['toko'] = $this->M_excel->ambil_toko()->result(); 
 		$data['content'] = 'Admin/view_monthly_report';
 		$this->load->view('template', $data);
 	}	
@@ -680,7 +681,9 @@ public function hapus_item_delivery2($id,$kode_id)
 	public function excel_report()
 	{
 		$tgl = $this->input->post('tgl');
-		$query = $this->M_excel->export($tgl); 
+		$toko = $this->input->post('ID_TOKO');
+		$nama_toko = $this->M_excel->ambil_nama_toko($toko)->row()->NAMA_TOKO; 
+		$query = $this->M_excel->export($tgl,$toko); 
 		if(!$query)
             return false;
 		
@@ -688,25 +691,90 @@ public function hapus_item_delivery2($id,$kode_id)
         $this->load->library('excel');
         // $this->load->library('PHPExcel/IOFactory');		
 		$object = new PHPExcel();
- 
-        $object->setActiveSheetIndex(0);
+		
+		$object->getActiveSheet()->getColumnDimension('A')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('B')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('C')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('D')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('E')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('F')->setAutoSize(true);
+        $object->getActiveSheet()->getColumnDimension('G')->setAutoSize(true);
+
+        $object->getActiveSheet()->getStyle(6)->getFont()->setBold(true);
+        
+        $header = array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            ),
+            'font' => array(
+                'bold' => true
+            )
+        );
+
+        $bulan = array (1 =>   'JANUARI',
+			'FEBRUARI',
+			'MARET',
+			'APRIL',
+			'MEI',
+			'JUNI',
+			'JULI',
+			'AGUSTUS',
+			'SEPTEMBER',
+			'OKTOBER',
+			'NOVEMBER',
+			'DESEMBER'
+		);
+
+		$split = explode('-', $tgl);
+
+
+        // ubah warna kolom
+
+		// $object->getActiveSheet()->getStyle('A5:G5')->getFill()
+		// 		->setFillType(PHPExcel_Style_Fill::FILL_GRADIENT_LINEAR);
+		// $object->getActiveSheet()->getStyle('A5:G5')->getFill()
+		// 		->getStartColor()->setRGB('F78B9D');
+		// $object->getActiveSheet()->getStyle('A5:G5')->getFill()
+		// 		->getEndColor()->setRGB('F78B9D');
+
+
+        $object->getActiveSheet()->getStyle("A1:G1")
+                ->applyFromArray($header);
+        $object->getActiveSheet()->getStyle("A2:G2")
+                ->applyFromArray($header);
+        $object->getActiveSheet()->getStyle("A3:G3")
+        		->applyFromArray($header);
+        $object->getActiveSheet()->getStyle("A5:G5")
+		        ->applyFromArray($header);
+
+        $object->getActiveSheet()->mergeCells('A1:G1');
+        $object->getActiveSheet()->mergeCells('A2:G2');
+        $object->getActiveSheet()->mergeCells('A3:G3');
+        $object->getActiveSheet()->mergeCells('A5:G5');
+        
+        $object->setActiveSheetIndex(0)
 		 // Field names in the first row
+
+        ->setCellValue('A1', 'LAPORAN PENJUALAN DAN STOK')
+        ->setCellValue('A2', 'NESCAFE DOLCE GUSTO')
+        ->setCellValue('A3', $nama_toko)
+        ->setCellValue('A5', $bulan[ (int)$split[1] ] . ' ' . $split[0]);
+
+
         $fields = array("No","Nama Produk", "Stok Awal", "Barang Masuk", "Sell Out", "Retur", "Stok Akhir");
         $col = 0;
         foreach ($fields as $field)
         {
-            $object->getActiveSheet()->setCellValueByColumnAndRow($col, 1, $field);
+            $object->getActiveSheet()->setCellValueByColumnAndRow($col, 6, $field);
             $col++;
         }
 		
 		// Fetching the table data
-        $cek_stat = $this->M_excel->export_satu($tgl)->result();
-  //       foreach ($cek->result_array() as $d) {
-		//  		$cek_stat	= $d['status'];
-		// }
+        $cek_stat = $this->M_excel->export_satu($tgl,$toko)->result();
 
         $no = 1;
-        $row = 2;
+        $row = 7;
         
 
 		foreach ($cek_stat as $data) {

@@ -27,7 +27,7 @@ class M_sellout extends CI_Model{
 
   public function view_item_sellout2($kode_lapor)
    {
-    $sql = "SELECT AI_ISI_LAPORAN,ID_LAPORAN, ITEM_JUAL, HARGA_JUAL, JUMLAH_JUAL
+    $sql = "SELECT LAPORAN_DATE,AI_ISI_LAPORAN,ID_LAPORAN, ITEM_JUAL, HARGA_JUAL, JUMLAH_JUAL
         -- tbl_reture.ID_RETURE AS KODE_RETURE, ID_RETURE,
 
       FROM tbl_isi_laporan, tbl_laporan
@@ -77,6 +77,7 @@ class M_sellout extends CI_Model{
    $sql= "DELETE FROM tbl_reture WHERE KODE_RETURE ='$kode_minta'";
    $result = $this->db->query($sql);
   }
+     
      function view_accepting_reture()
   {
      $this->db->select("*");
@@ -91,6 +92,50 @@ class M_sellout extends CI_Model{
    $result = $this->db->query($sql);
   }
 
+  public function edit($tanda,$data)
+  {
+    
+    $this->db->where('AI_ISI_LAPORAN',$tanda);
+    $this->db->update('tbl_isi_laporan',$data);
 
+  }
 
+  public function cekstok($data,$toko)
+  {
+      
+    $this->db->select("JUMLAH");
+    $this->db->from("tbl_stok");
+    $this->db->where("ID_BARANG", $data);
+    $this->db->where("ID_STORE", $toko);
+    $query = $this->db->get();
+    return $query;
+  }
+
+  public function cek_jumlah($data,$id_lapor)
+  {
+    $this->db->select("JUMLAH_JUAL");
+    $this->db->from("tbl_isi_laporan");
+    $this->db->where("ITEM_JUAL", $data);
+    $this->db->where("ID_LAPORAN", $id_lapor);
+    $query = $this->db->get();
+    return $query;
+  }
+
+  public function ambil_nama($ai_isi_lapor)
+  {
+    $this->db->select("ITEM_JUAL");
+    $this->db->from("tbl_isi_laporan");
+    $this->db->where("AI_ISI_LAPORAN", $ai_isi_lapor);
+    $query = $this->db->get();
+    return $query;
+  }
+
+  public function cek($ai_isi_lapor)
+  {
+    $this->db->select("JUMLAH_JUAL");
+    $this->db->from("tbl_isi_laporan");
+    $this->db->where("AI_ISI_LAPORAN", $ai_isi_lapor);
+    $query = $this->db->get();
+    return $query;
+  }
 }
