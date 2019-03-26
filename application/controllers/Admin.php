@@ -771,30 +771,60 @@ public function hapus_item_delivery2($id,$kode_id)
         }
 		
 		// Fetching the table data
-        $cek_stat = $this->M_excel->export_satu($tgl,$toko)->result();
-
+        
         $no = 1;
         $row = 7;
-        
+       
+        $ambil_brg = $this->M_excel->ambil_nama()->result();
 
-		foreach ($cek_stat as $data) {
-
-			if ($data->status == "4") {
-				
-				continue;
-			}
+		foreach ($ambil_brg as $data) {
 
 			$object->getActiveSheet()->setCellValueByColumnAndRow(0, $row, $no++);     
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $row, $data->nama_item);
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(2, $row, $data->stok_awal);
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $row, ($data->status == "1") ? $data->jumlah : NULL);
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $row, ($data->status == "2") ? $data->jumlah : NULL);
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $row, ($data->status == "3") ? $data->jumlah : NULL);
-	        $object->getActiveSheet()->setCellValueByColumnAndRow(6, $row, $data->stok_akhir);
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(1, $row, $data->NAMA_ITEM);
+	        
+	        $tgl = $this->input->post('tgl');
+			$toko = $this->input->post('ID_TOKO');
+	        $nama = $data->NAMA_ITEM;
+	        $id_brg = $this->M_excel->ambil_id($nama)->row()->ID_ITEM;
+	        
+	        // ----------------------------------------------------------------------
+	        $cek_stok_awal = $this->M_excel->cek_stok($id_brg,$toko,$tgl)->row();
+	        if ($cek_stok_awal == NULL) {
+	        	# code...
+	        	$object->getActiveSheet()->setCellValueByColumnAndRow(2, $row, 0);
+	        }
+
+	        $awal_stok = $this->M_excel->ambil_stok($id_brg,$toko,$tgl)->result();
+	        foreach ($awal_stok as $datas) {
+	   			$object->getActiveSheet()->setCellValueByColumnAndRow(2, $row, $datas->stok_awal);
+	        }
+	        
+	        // ----------------------------------------------------------------------
+	        $jumlah_masuk = $this->M_excel->ambil_jumlah_masuk($id_brg,$toko,$tgl)->row()->jumlah;
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(3, $row, ($jumlah_masuk != NULL) ? $jumlah_masuk : 0);
+
+			// ----------------------------------------------------------------------
+	        $jumlah_sell = $this->M_excel->ambil_jumlah_sell($id_brg,$toko,$tgl)->row()->jumlah;
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(4, $row, ($jumlah_sell != NULL) ? $jumlah_sell : 0);
+
+	        // ----------------------------------------------------------------------
+	        $jumlah_retur = $this->M_excel->ambil_jumlah_retur($id_brg,$toko,$tgl)->row()->jumlah;
+	        $object->getActiveSheet()->setCellValueByColumnAndRow(5, $row, ($jumlah_retur != NULL) ? $jumlah_retur : 0);
+
+	        // ----------------------------------------------------------------------
+	        $cek_stok_akhir = $this->M_excel->cek_stok_akhir($id_brg,$toko,$tgl)->row();
+	        if ($cek_stok_akhir == NULL) {
+	        	# code...
+	        	$object->getActiveSheet()->setCellValueByColumnAndRow(6, $row, 0);
+	        }
+
+	        $akhir_stok = $this->M_excel->ambil_stok_akhir($id_brg,$toko,$tgl)->result();
+	        foreach ($akhir_stok as $datas) {
+	   			$object->getActiveSheet()->setCellValueByColumnAndRow(6, $row, $datas->stok_akhir);
+	        }
 	        	
 			$row++;
-		 
-		// 
+		  
 		}
         
 		
