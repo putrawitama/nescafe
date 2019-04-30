@@ -52,6 +52,7 @@
           <ul class="treeview-menu">
             <li><a href="<?= base_url('Admin/view_item')?>"><i class="fa fa-circle-o"></i>View Product </a></li>
             <li><a href="<?= base_url('Admin/add_item')?>"><i class="fa fa-circle-o"></i> Add Product</a></li>
+            <li><a href="<?= base_url('Admin/view_category')?>"><i class="fa fa-circle-o"></i> Category</a></li>
           </ul>
         </li>
         <li class="treeview">
@@ -83,12 +84,15 @@
 
  <?php }elseif($level == "2"){  ?>
 
-            <li><a href="<?= base_url('Bp/view_item_request')?>"><i class="fa fa-pie-chart"></i>Product request</a></li>
+          <li><a href="<?= base_url('Bp/view_item_request')?>"><i class="fa fa-pie-chart"></i>Product request</a></li>
         
-            <li><a href="<?= base_url('Bp/accepting_item_delivery')?>"><i class="fa fa-pie-chart"></i>accepting Product delivery</a></li>
+          <li><a href="<?= base_url('Bp/accepting_item_delivery')?>"><i class="fa fa-pie-chart"></i>accepting Product delivery</a></li>
         
-         <li><a href="<?= base_url('Bp/view_item_sellout')?>"><i class="fa fa-circle-o"></i> View Sell Out</a></li>
+          <li><a href="<?= base_url('Bp/view_item_sellout')?>"><i class="fa fa-circle-o"></i> View Sell Out</a></li>
+          
           <li><a href="<?= base_url('Bp/view_item_reture')?>"><i class="fa fa-circle-o"></i> Product reture</a></li>
+
+         <li><a href="<?= base_url('Bp/view_monthly_report')?>"><i class="fa fa-circle-o text-red"></i><span> Monthly Sell Out Report</span></a></li>
           
          <li>
           <a href="<?= base_url('Bp/view_stock')?>"><i class="fa fa-circle-o"></i> View Stock</a>

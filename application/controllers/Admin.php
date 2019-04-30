@@ -5,10 +5,16 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Admin extends CI_Controller {
 	function __construct(){
 		parent::__construct();
-		$this->load->model(array('View_of','M_item','M_item_request','M_employee','M_item_delivery','M_stock', 'M_excel'));
+		$this->load->model(array('View_of','M_item','M_item_request','M_category','M_employee','M_item_delivery','M_stock', 'M_excel'));
 		$this->load->helper('url');
 		$this->load->helper('form');
 		$this->load->library('session');
+		$this->load->library('pdf');
+
+		if ($this->session->userdata('nip') == NULL){
+            redirect('Controller_login');
+        }
+
 	}
 
 	public function index()
@@ -130,7 +136,70 @@ class Admin extends CI_Controller {
         {
        		 redirect('admin/view_item');
         }
-  }
+ 	 }
+
+	public function view_category()
+		{
+			$data['cetak1'] = $this->M_category->view_category();
+			$data['content'] = 'Admin/view_category';
+			$this->load->view('template', $data);
+		}
+
+		public function add_category()
+	{
+		if ($this->input->server('REQUEST_METHOD') == 'POST') {
+			$file = $this->input->post('code');
+			
+				$data = array (
+					'ID_KATEGORI'		=> $this->input->post('code'),
+					'NAMA_KATEGORI'		=> $this->input->post('nama'),
+					'BATAS_KIRIM'		=> $this->input->post('batas'),
+					'AKTIF'				=> 'y'
+			);
+
+			$this->db->insert('tbl_kategori', $data);
+			redirect('admin/view_category');
+		}
+		$data['content'] = 'Admin/add_category';
+		$this->load->view('template', $data);
+	}
+
+	public function edit_category($kode_category)
+	{
+		$files = glob('asset/temp/*');
+		foreach ($files as $file)
+		{
+			if (is_file($file)) {
+				unlink($file);
+			}
+		}
+
+		if ($this->input->server('REQUEST_METHOD') == 'POST') {
+			$file = $this->input->post('code');
+			
+				$data = array (
+					'ID_KATEGORI'		=> $this->input->post('code'),
+					'NAMA_KATEGORI'		=> $this->input->post('nama'),
+					'BATAS_KIRIM'		=> $this->input->post('batas'),
+					
+				);
+				$this->db->update('tbl_kategori', $data, "ID_KATEGORI = '$kode_category'");
+			
+			redirect('admin/view_category');
+		}
+		$data['content'] = 'Admin/edit_category';
+		$data['kategori'] = $this->db->query("SELECT * FROM tbl_kategori WHERE ID_KATEGORI = '$kode_category'");
+		$this->load->view('template', $data);
+	}
+
+ function hapus_category()
+	{
+     $id = $this->uri->segment(3);
+     $this->M_category->hapus_category($id) ;
+        {
+       		 redirect('admin/view_category');
+        }
+ 	 }
 
 
 	public function view_item_request()
@@ -147,7 +216,7 @@ class Admin extends CI_Controller {
 		$data['jaga'] = $this->db->query("SELECT * FROM tbl_penjaga WHERE NIP_JAGA = '$usr' LIMIT 1");
 		$data['lastcode'] = $this->db->query("SELECT * FROM tbl_permintaan ORDER BY KODE_PERMINTAAN DESC LIMIT 1");
 		$data['kat'] = $this->db->query("SELECT * FROM tbl_toko");
-		$data['bpkat'] = $this->db->query("SELECT * FROM tbl_pegawai WHERE LEVEL = 2 ");
+		// $data['bpkat'] = $this->db->query("SELECT * FROM tbl_pegawai WHERE LEVEL = 2 ");
 		$data['cetak1'] = $this->M_item_request->view_item_request();
 		$data['content'] = 'Admin/accepting_request';
 		$this->load->view('template', $data);
@@ -193,14 +262,6 @@ class Admin extends CI_Controller {
 
 		);
 		$this->db->insert('tbl_pengiriman', $data);
-	}
-
-		$sql = "UPDATE tbl_permintaan
-				SET STATUS_PERMINTAAN= 2
-				WHERE KODE_PERMINTAAN ='".$KODE_PERMINTAAN."'
-				";
-
-		$result = $this->db->query($sql);
 
 		// ------
 
@@ -224,11 +285,22 @@ class Admin extends CI_Controller {
 		$this->db->insert('tbl_mutasi', $data_mutasi);
 
 		// ------
+	}
+
+		$sql = "UPDATE tbl_permintaan
+				SET STATUS_PERMINTAAN= 2
+				WHERE KODE_PERMINTAAN ='".$KODE_PERMINTAAN."'
+				";
+
+		$result = $this->db->query($sql);
+
+		
 		redirect("Admin/accepting_item_request");
 	}
 
 	public function detail_item_request($KODE_PERMINTAAN) { 
 		$data['deliv'] = $this->M_item_request->find($KODE_PERMINTAAN);
+		$data['kode'] = $KODE_PERMINTAAN;
 		$data['cetak1'] = $this->M_item_request->view_item_request2($KODE_PERMINTAAN);
 		$data['content'] = 'Admin/detail_item_request';
 		$this->load->view('template', $data);
@@ -643,15 +715,15 @@ public function hapus_item_delivery2($id,$kode_id)
 
 	public function detail_item_delivery($KODE_PENGIRIMAN) {
 		$data['deliv'] = $this->M_item_delivery->find($KODE_PENGIRIMAN);
+		$data['kode'] = $KODE_PENGIRIMAN;
 		$data['cetak1'] = $this->M_item_delivery->view_item_delivery2($KODE_PENGIRIMAN);
 		$data['content'] = 'Admin/detail_item_delivery';
 		$this->load->view('template', $data);
 	}
 
-	public function view_stock()
-	{
-		$data['cetak1'] = $this->View_of->viewall("tbl_toko");
+	public function view_stock(){
 		$data['a'] = 2;
+		$data['cetak1'] = $this->M_stock->select_toko1();
 		$data['content'] = 'Admin/view_stock';
 		$this->load->view('template', $data);
 	}
@@ -659,10 +731,11 @@ public function hapus_item_delivery2($id,$kode_id)
 	public function view_stock_toko()
 	{
 		if ($this->input->server('REQUEST_METHOD') == 'POST') {
-			$data['cetak1'] = $this->View_of->viewall("tbl_toko");
+			$data['cetak1'] = $this->M_stock->select_toko1();
 			$data['kode_toko'] = $this->input->post('toko');
 			$data['a'] = 0;
 			$data['cetak2'] = $this->M_stock->view_all_stock($data['kode_toko']);
+			$data['cetak4'] = $this->View_of->viewall("tbl_kategori");
 			$data['cetak3'] = $this->M_stock->view_all_stock2($data['kode_toko']);
 			$data['content'] = 'Admin/view_stock';
 			$this->load->view('template', $data);
@@ -673,9 +746,28 @@ public function hapus_item_delivery2($id,$kode_id)
 	public function view_monthly_report()
 	{
 		$data['toko'] = $this->M_excel->ambil_toko()->result(); 
+		$data['a'] = 2;
 		$data['content'] = 'Admin/view_monthly_report';
 		$this->load->view('template', $data);
-	}	
+	}
+
+	public function view_monthly_report2()
+	{
+		if ($this->input->server('REQUEST_METHOD') == 'POST') {
+			$data['toko'] = $this->M_excel->ambil_toko()->result();
+			$data['a'] = 0; 
+			$tgl = $this->input->post('tgl');
+		 	$toko = $this->input->post('ID_TOKO'); 
+		 	$nama_toko = $this->M_excel->ambil_nama_toko($toko)->row()->NAMA_TOKO; 
+			
+			$data['cetak3'] = $this->M_excel->ambil_nama_toko($data['ID_TOKO']); 
+ 
+			$data['cetak2'] = $this->M_excel->export_satu($tgl,$toko);
+			$data['content'] = 'Admin/view_monthly_report';
+			$this->load->view('template', $data);
+		}
+
+	}
 
 
 	public function excel_report()
@@ -683,9 +775,9 @@ public function hapus_item_delivery2($id,$kode_id)
 		$tgl = $this->input->post('tgl');
 		$toko = $this->input->post('ID_TOKO');
 		$nama_toko = $this->M_excel->ambil_nama_toko($toko)->row()->NAMA_TOKO; 
-		$query = $this->M_excel->export($tgl,$toko); 
-		if(!$query)
-            return false;
+		// $query = $this->M_excel->export($tgl,$toko); 
+		// if(!$query)
+  //           return false;
 		
 		 
         $this->load->library('excel');
@@ -839,5 +931,190 @@ public function hapus_item_delivery2($id,$kode_id)
        
 	}
 
+	public function report_view()
+	{
+		$data['toko'] = $this->M_excel->ambil_toko()->result();
+		$data['ambil_brg'] = $this->M_excel->ambil_nama()->result();
+	    $data['tgl'] = $this->input->post('tgl');
+		$data['tok'] = $this->input->post('ID_TOKO');
+
+		$data['content'] = 'Admin/view_monthly_report2';
+		$this->load->view('template', $data);
+	}
 	
+	public function cetak_pdf($kode)
+	{
+        $pdf = new FPDF('l','mm','A5');
+        // membuat halaman baru
+        $pdf->AddPage();
+        // setting jenis font yang akan digunakan
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(200,6,'DELIVERY ORDER',0,1,'C');
+        
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(200,8,'SURAT JALAN',0,1,'C');
+
+        // GARIS BAWAH
+        $pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,28,200,28);
+        // Memberikan space kebawah agar tidak terlalu rapat
+        $pdf->Cell(10,6,'',0,1);
+
+        // --------------------------------------------------------//
+        $deliv = $this->M_item_delivery->find($kode);
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(30,5,'No',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$kode,0,1);
+
+        $pdf->Cell(30,5,'Date / Tanggal',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->TANGGAL,0,1);
+
+        $pdf->Cell(30,5,'To / Tujuan',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->NAMA_TOKO,0,1);
+
+        $pdf->Cell(30,5,'',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->ALAMAT_TOKO,0,1);
+
+        $pdf->Cell(30,5,'Brand Presenter',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->NAMA_PEG,0,1);
+
+        // --------------------------------------------------------//
+        $pdf->Cell(10,4,'',0,1);
+
+        $pdf->SetFont('Arial','B',10);
+        $pdf->Cell(17,6,'NO',1,0,'C');
+        $pdf->Cell(60,6,'Product Code / Kode Produk',1,0,'C');
+        $pdf->Cell(90,6,'Product Name / Nama Produk',1,0,'C');
+        $pdf->Cell(23,6,'QTY',1,1,'C');
+        
+        $pdf->SetFont('Arial','',10);
+        $total = 0;
+        $no = 1;
+        $cetak1 = $this->M_item_delivery->view_item_delivery2($kode);
+        foreach ($cetak1 as $row){
+            $pdf->Cell(17,7,$no++,0,0,'C');
+            $pdf->Cell(60,7,$row->NAMA_PENGIRIMAN,0,0,'C');
+            $pdf->Cell(90,7,$row->ITEM,0,0,'C');
+            $pdf->Cell(23,7,$row->QTY,0,1,'C');
+            $total = $total + $row->QTY;
+        }
+
+        $pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,59,10,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(27,59,27,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(87,59,87,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(177,59,177,122);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(200,59,200,122);
+
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,128,200,128);
+		// $pdf->SetDrawColor(188,188,188);
+		// $pdf->Line(10,130,200,130);
+
+		$pdf ->SetY(122);
+		$pdf->SetFont('Arial','B',11);
+        $pdf->Cell(17,6,'',0,0,'C');
+        $pdf->Cell(60,6,'',0,0);
+        $pdf->Cell(90,6,'TOTAL : ',1,0,'C');
+        $pdf->Cell(23,6,$total,1,1,'C');
+
+        $pdf->Output();
+    }
+
+    public function cetak_req_pdf($kode)
+	{
+        $pdf = new FPDF('l','mm','A5');
+        // membuat halaman baru
+        $pdf->AddPage();
+        // setting jenis font yang akan digunakan
+        $pdf->SetFont('Arial','B',14);
+        $pdf->Cell(200,6,'REQUEST ORDER',0,1,'C');
+        
+        $pdf->SetFont('Arial','B',11);
+        $pdf->Cell(200,8,'SURAT JALAN',0,1,'C');
+
+        // GARIS BAWAH
+        $pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,28,200,28);
+        // Memberikan space kebawah agar tidak terlalu rapat
+        $pdf->Cell(10,6,'',0,1);
+
+        // --------------------------------------------------------//
+        $deliv = $this->M_item_request->find($kode);
+        $pdf->SetFont('Arial','',10);
+        $pdf->Cell(30,5,'No',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$kode,0,1);
+
+        $pdf->Cell(30,5,'Date / Tanggal',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->TANGGAL,0,1);
+
+        $pdf->Cell(30,5,'To / Tujuan',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->NAMA_TOKO,0,1);
+
+        $pdf->Cell(30,5,'',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->ALAMAT_TOKO,0,1);
+
+        $pdf->Cell(30,5,'Brand Presenter',0,0);
+        $pdf->Cell(5,5,':',0,0);
+        $pdf->Cell(10,5,$deliv->NAMA_PEG,0,1);
+
+        // --------------------------------------------------------//
+        $pdf->Cell(10,4,'',0,1);
+
+        $pdf->SetFont('Arial','B',10);
+        $pdf->Cell(17,6,'NO',1,0,'C');
+        $pdf->Cell(60,6,'Product Code / Kode Produk',1,0,'C');
+        $pdf->Cell(90,6,'Product Name / Nama Produk',1,0,'C');
+        $pdf->Cell(23,6,'QTY',1,1,'C');
+        
+        $pdf->SetFont('Arial','',10);
+        $total = 0;
+        $no = 1;
+        $cetak1 = $this->M_item_request->view_item_request2($kode);
+        foreach ($cetak1 as $row){
+            $pdf->Cell(17,7,$no++,0,0,'C');
+            $pdf->Cell(60,7,$row->NAMA_PERMINTAAN,0,0,'C');
+            $pdf->Cell(90,7,$row->ITEM,0,0,'C');
+            $pdf->Cell(23,7,$row->QTY,0,1,'C');
+            $total = $total + $row->QTY;
+        }
+
+        $pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,59,10,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(27,59,27,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(87,59,87,128);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(177,59,177,122);
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(200,59,200,122);
+
+		$pdf->SetDrawColor(188,188,188);
+		$pdf->Line(10,128,200,128);
+		// $pdf->SetDrawColor(188,188,188);
+		// $pdf->Line(10,130,200,130);
+
+		$pdf ->SetY(122);
+		$pdf->SetFont('Arial','B',11);
+        $pdf->Cell(17,6,'',0,0,'C');
+        $pdf->Cell(60,6,'',0,0);
+        $pdf->Cell(90,6,'TOTAL : ',1,0,'C');
+        $pdf->Cell(23,6,$total,1,1,'C');
+
+        $pdf->Output();
+    }
 }

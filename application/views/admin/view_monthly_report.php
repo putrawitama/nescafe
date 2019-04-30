@@ -24,7 +24,8 @@
             </div>
             <!-- /.box-header -->
             <div class="box-body">
-              <form class="form-horizontal" action="<?= base_url('admin/excel_report/')?>" method="post">
+              
+                <form class="form-horizontal" id="report" action="" method="post">
                 <div class="box-body">
                  
                   <div class="form-group">
@@ -37,9 +38,11 @@
                   <div class="form-group">
                     <label for="inputEmail3" class="col-sm-2 control-label">Toko : </label>
                     <div class="col-sm-8">
-                      <select name="ID_TOKO" class="form-control">
+                      <select name="ID_TOKO" class="form-control" >
                               <?php foreach($toko as $select){ ?>
-                            <option value="<?php echo $select->ID_TOKO ?>" > <?php echo $select->NAMA_TOKO ?> </option>
+
+                            <option value="<?php echo $select->ID_TOKO ?>"
+                              > <?php echo $select->NAMA_TOKO ?> </option>
                             <?php } ?>            
                       </select>
                     </div>
@@ -47,15 +50,29 @@
 
                 </div>
                 <div class="box-footer">
-                  <button type="submit" class="btn btn-info pull-right">Export</button>
+                  <input type="button" class="btn btn-info pull-left" value="View Table" name="view" onclick="askForView()" />
+                  <input type="button" class="btn btn-primary pull-right" value="Export" name="export" onclick="askForExport()" />
                 </div>
               </form>
+              
+              <script>
+                form = document.getElementById("report");
+                function askForExport() {
+                        form.action="<?= base_url('admin/excel_report')?>";
+                        form.submit();
+                }
+                function askForView() {
+                        form.action="<?= base_url('admin/report_view')?>";
+                        form.submit();
+                }   
+              </script>
+              
             </div>
             <!-- /.box-body -->
           </div>
           <!-- /.box -->
         </div>
-        <!-- /.col -->
+        
       </div>
       <!-- /.row -->
     </section>

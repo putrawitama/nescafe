@@ -5,6 +5,10 @@ class Spv extends CI_Controller {
 	function __construct(){
 		parent::__construct();
 		$this->load->model(array('View_of','M_item_reture','M_news', 'M_stock'));
+
+		if ($this->session->userdata('nip') == NULL){
+            redirect('Controller_login');
+        }
 	}
 
 	public function index()

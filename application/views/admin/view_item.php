@@ -44,7 +44,11 @@
                   <tr>
                     <td><?= $data1->ID_ITEM?></td>
                     <td><?= $data1->NAMA_ITEM?></td>
-                    <td><?= $data1->HARGA?></td>
+                    <td>Rp.<?php
+
+                      $angka = $data1->HARGA;
+                      echo number_format ($angka, 0, '', '.');
+                      ?> </td>
                     <td>
                       <img style="width: 50px" src="<?= base_url()?>asset/item/<?= $data1->GAMBAR?>">
                     </td>
@@ -52,7 +56,7 @@
                     <td>
                       <!-- 'admin/products/edit/'.$product->pro_id, -->
                       <a href="<?php echo base_url(); ?>index.php/Admin/edit_item/<?php echo $data1->ID_ITEM; ?>" class="btn btn-primary">Edit</a>
-                      <a href="<?php echo base_url(); ?>index.php/Admin/hapus_item/<?php echo $data1->ID_ITEM; ?>" class="btn btn-danger"> Delete </a>
+                      <a href="<?php echo base_url(); ?>index.php/Admin/hapus_item/<?php echo $data1->ID_ITEM; ?>" class="btn btn-danger" onclick="return confirm(\'Yakin ingin menghapus data ini?\')"> Delete </a>
                     </td>
                   </tr>
                 <?php } ?>

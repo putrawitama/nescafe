@@ -111,6 +111,7 @@
 
 <div class="right">
    <button type="button" class="btn red" onclick="window.history.go(-1)">Kembali</button>
+   <a href="<?= base_url("Admin/cetak_req_pdf/$kode")?>" class="btn btn-primary pull-right">Download as PDF</a>
   
 </div>
 <br/>

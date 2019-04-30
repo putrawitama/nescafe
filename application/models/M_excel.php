@@ -2,52 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 class M_excel extends CI_Model{
 
-	// Listing
-	// public function report_monthly() {
-	// 	$this->db->select('*');
-	// 	$this->db->from('tbl_stok');
-	// 	$query = $this->db->get();
-	// 	return $query->result();
-	// }
-
-	// public function machine() {
-	// 	$this->db->select('*');
-	// 	$this->db->from('tbl_item');
-	// 	$this->db->where('AI_PRODUK', 1);
-	// 	$query = $this->db->get();
-	// 	return $query->result();
-	// }
-	// public function capsule() {
-	// 	$this->db->select('*');
-	// 	$this->db->from('tbl_item');
-	// 	$this->db->where('AI_PRODUK', 2);
-	// 	$query = $this->db->get();
-	// 	return $query->result();
-	// }
-	// public function wire() {
-	// 	$this->db->select('*');
-	// 	$this->db->from('tbl_item');
-	// 	$this->db->where('AI_PRODUK', 3);
-	// 	$query = $this->db->get();
-	// 	return $query->result();
-	// }
-	// public function hampers() {
-	// 	$this->db->select('*');
-	// 	$this->db->from('tbl_item');
-	// 	$this->db->where('AI_PRODUK', 4);
-	// 	$query = $this->db->get();
-	// 	return $query->result();
-	// }
-
-	public function export($tgl)
-	{
-		$this->db->select('a.stok_awal, a.jumlah, a.stok_akhir, a.created_at, b.nama_item');
- 		$this->db->from('tbl_mutasi as a');
- 		$this->db->join('tbl_item as b', 'a.id_barang = b.id_item');
- 		$this->db->like('a.created_at', $tgl);
- 		return $this->db->get();
-	}
-
+	
 	public function export_satu($tgl,$ID_TOKO)
 	{
 		$this->db->select('a.stok_awal, a.jumlah, a.stok_akhir, a.created_at, b.nama_item, a.status');
@@ -174,6 +129,32 @@ class M_excel extends CI_Model{
  		$this->db->like('created_at', $tgl);
  		$this->db->order_by('id_mutasi', 'desc');
  		$this->db->limit(1);
+ 		return $this->db->get();
+	}
+
+	public function select_ai($tgl,$user_toko)
+	{
+		$this->db->select('AI_LAPORAN');
+ 		$this->db->from('tbl_laporan');
+ 		$this->db->like('LAPORAN_DATE', $tgl);
+ 		$this->db->where('TOKO_JUAL', $user_toko);
+ 		return $this->db->get();
+	}
+
+	public function select_tanggal($tgl,$user_toko)
+	{
+		$this->db->select('LAPORAN_DATE, AI_LAPORAN');
+ 		$this->db->from('tbl_laporan');
+ 		$this->db->like('LAPORAN_DATE', $tgl);
+ 		$this->db->where('TOKO_JUAL', $user_toko);
+ 		return $this->db->get();
+	}
+
+	public function isi($ai_lapor)
+	{
+		$this->db->select('ITEM_JUAL, HARGA_JUAL, JUMLAH_JUAL');
+ 		$this->db->from('tbl_isi_laporan');
+ 		$this->db->where('ID_LAPORAN', $ai_lapor);
  		return $this->db->get();
 	}
 }

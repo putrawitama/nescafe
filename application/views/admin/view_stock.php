@@ -36,8 +36,8 @@
                   <div class="form-group">
                     <label for="inputPassword3" class="col-sm-2 control-label">Name Store</label>
                     <div class="col-sm-8">
-                      <select class="form-control" name="toko" required>
-                        <option></option>
+                      <select class="form-control"  name="toko" onchange="this.form.submit();">
+                      
                         <?php foreach($cetak1 as $cat){ ?>
                           <option value="<?= $cat->ID_TOKO ?>"><?= $cat->NAMA_TOKO ?></option>
                         <?php } ?>
@@ -48,9 +48,7 @@
 
 
                 <!-- /.box-body -->
-                <div class="box-footer">
-                  <button type="submit" class="btn btn-info pull-right">View Stock</button>
-                </div>
+                
                 <!-- /.box-footer -->
               </form>
             </div>
@@ -65,7 +63,7 @@
           <div class="box">
             <div class="box-header">
               <?php foreach($cetak3 as $data1){?> <?php } ?>
-              <h3 class="box-title">LIST OF PRODUCT AVAILABLE ON <?= $data1->NAMA_TOKO?> </h3>
+              <h3 class="box-title">List Of Product Available On <?= $data1->NAMA_TOKO?> </h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body">
@@ -80,7 +78,7 @@
                 </thead>
                 <tbody>
                 <?php foreach($cetak2 as $data1){?>
-                  <?php if ($data1->JUMLAH < 2): ?>
+                  <?php if ($data1->JUMLAH <= $data1->BATAS_KIRIM): ?>
                     <tr>
                       <td ><?= $data1->ID_BARANG?></td>
                       <td><?= $data1->NAMA?></td>

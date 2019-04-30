@@ -46,4 +46,6 @@ public function find($NIP)//للبحث عن رقم المنتج وتحقق من 
 				}//end if code->num_rows >
 
 		}
+
+	
 }

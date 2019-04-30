@@ -55,4 +55,12 @@ public function hapus_item($id){
 		// $this->db->update('tbl_item',$data);
 }
 
+	public function select_nama($kode_brg)
+	{
+		$this->db->select('NAMA_ITEM');
+ 		$this->db->from('tbl_item');
+ 		$this->db->where('ID_ITEM', $kode_brg);
+ 		return $this->db->get();
+	}
+
 }

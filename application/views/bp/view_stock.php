@@ -42,7 +42,7 @@
                 </thead>
                 <tbody>
                 <?php foreach($cetak2 as $data1){?>
-                  <?php if ($data1->JUMLAH < 2): ?>
+                  <?php if ($data1->JUMLAH <= $data1->BATAS_KIRIM): ?>
                     <tr>
                       <td ><?= $data1->ID_BARANG?></td>
                       <td><?= $data1->NAMA?></td>

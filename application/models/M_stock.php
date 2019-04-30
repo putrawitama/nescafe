@@ -7,9 +7,10 @@ public function view_all_stock($kode_toko)
  	$sql = "SELECT tbl_stok.ID_BARANG AS ID_BARANG,
    	    tbl_item.NAMA_ITEM AS NAMA,
  		tbl_stok.JUMLAH AS JUMLAH,
-        tbl_toko.NAMA_TOKO AS NAMA_TOKO
- 		FROM tbl_stok, tbl_item, tbl_toko
-        WHERE tbl_stok.ID_BARANG = tbl_item.ID_ITEM AND tbl_stok.ID_STORE = tbl_toko.ID_TOKO AND tbl_stok.ID_STORE= $kode_toko" ;
+        tbl_toko.NAMA_TOKO AS NAMA_TOKO,
+        tbl_kategori.BATAS_KIRIM AS BATAS_KIRIM
+ 		FROM tbl_stok, tbl_item, tbl_toko, tbl_kategori
+        WHERE tbl_stok.ID_BARANG = tbl_item.ID_ITEM AND tbl_item.AI_PRODUK=tbl_kategori.ID_KATEGORI AND tbl_stok.ID_STORE = tbl_toko.ID_TOKO AND tbl_stok.ID_STORE= $kode_toko" ;
 
     $result = $this->db->query($sql);
     return $result->result();
@@ -128,6 +129,27 @@ public function view_all_stock($kode_toko)
 
     }
 
+
+    public function select_nama_toko($user_toko)
+    {
+        
+        $this->db->select('NAMA_TOKO');
+        $this->db->from('tbl_toko');
+        $this->db->where('ID_TOKO', $user_toko);
+        $rs_data = $this->db->get();
+        return $rs_data;
+
+    }
+
+    public function select_toko1()
+    {
+        
+        $sql = "SELECT * FROM `tbl_toko` WHERE ID_TOKO>1";
+          $result = $this->db->query($sql);
+    return $result->result();
+
+    }
+
     function update_mutasi($jumlahstok,$brg,$tok){   
         $this->db->set('JUMLAH', $jumlahstok); //value that used to update column 
         $this->db->set('JUMLAH', $jumlahstok);
@@ -135,6 +157,14 @@ public function view_all_stock($kode_toko)
         $this->db->where('ID_BARANG', $brg);
         $this->db->where('ID_STORE', $tok); //which row want to upgrade  
         $this->db->update('tbl_stok');  //table name
+    }
+
+    public function select_pegawai($nip)
+    {
+        $this->db->select('NAMA_PEG');
+        $this->db->from('tbl_pegawai');
+        $this->db->where('NIP', $nip);
+        return $this->db->get();
     }
 
 }

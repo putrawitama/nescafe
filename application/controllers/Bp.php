@@ -4,7 +4,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class Bp extends CI_Controller {
 	function __construct(){
 		parent::__construct();
-		$this->load->model(array('View_of','M_item_request','M_item_delivery','M_stock','M_item_reture','M_sellout'));
+		$this->load->model(array('View_of','M_item_request','M_item_delivery','M_stock','M_item_reture','M_sellout','M_excel', 'M_item'));
+
+		if ($this->session->userdata('nip') == NULL){
+            redirect('Controller_login');
+        }
 	}
 
 	public function index()
@@ -273,6 +277,26 @@ class Bp extends CI_Controller {
 											$sql= "UPDATE tbl_stok SET JUMLAH = JUMLAH + $y WHERE ID_BARANG = '$x' AND ID_STORE = '$z'";
 											// echo $sql;
 											$result = $this->db->query($sql);
+
+											
+					date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
+					$now = date('Y-m-d');
+
+					$get_id = $this->M_stock->ambil_id()->result();
+					$jumlah_stok = $this->M_stock->ambil_jumlah($ID_BARANG, $ID_STORE)->row()->JUMLAH;
+					$STOK_AWAL = $jumlah_stok - $cetak1['JUMLAH_PENGIRIMAN'];
+
+					$data_mutasi = array (
+						'ID_TOKO'			=> $cetak1['TOKO_PENGIRIMAN'],
+						'ID_BARANG'			=> $cetak1['NAMA_PENGIRIMAN'],
+						'STOK_AWAL'		  	=> $STOK_AWAL,
+						'JUMLAH'		  	=> $cetak1['JUMLAH_PENGIRIMAN'],
+						'STOK_AKHIR'		=> $jumlah_stok,
+						'CREATED_AT'		=> $now,
+						'STATUS'			=> 1
+					);
+
+					$this->db->insert('tbl_mutasi', $data_mutasi);
 										}
 
 							  		
@@ -299,24 +323,6 @@ class Bp extends CI_Controller {
 
 							$result = $this->db->query($sql);
 
-					date_default_timezone_set('Asia/Karachi'); # add your city to set local time zone
-					$now = date('Y-m-d');
-
-					$get_id = $this->M_stock->ambil_id()->result();
-					$jumlah_stok = $this->M_stock->ambil_jumlah($ID_BARANG, $ID_STORE)->row()->JUMLAH;
-					$STOK_AWAL = $jumlah_stok - $cetak1['JUMLAH_PENGIRIMAN'];
-
-					$data_mutasi = array (
-						'ID_TOKO'			=> $cetak1['TOKO_PENGIRIMAN'],
-						'ID_BARANG'			=> $cetak1['NAMA_PENGIRIMAN'],
-						'STOK_AWAL'		  	=> $STOK_AWAL,
-						'JUMLAH'		  	=> $cetak1['JUMLAH_PENGIRIMAN'],
-						'STOK_AKHIR'		=> $jumlah_stok,
-						'CREATED_AT'		=> $now,
-						'STATUS'			=> 1
-					);
-
-					$this->db->insert('tbl_mutasi', $data_mutasi);
 			
 			
 			redirect("Bp/accepting_item_delivery");
@@ -841,71 +847,238 @@ public function view_stock()
 		redirect('Bp/add_sellout_item/'.$tgl);
 	}
 
-	public function export($tgl)
-{
 
-$cetak = $this->M_sellout->view_item_sellout2($tgl);
-// Create new Spreadsheet object
-$spreadsheet = new Spreadsheet();
+	public function view_monthly_report()
+	{
+		$data['content'] = 'bp/view_monthly_report';
+		$this->load->view('template', $data);
+	}
 
-// Set document properties
-$spreadsheet->getProperties()->setCreator('Andoyo - Java Web Media')
-->setLastModifiedBy('Andoyo - Java Web Medi')
-->setTitle('Office 2007 XLSX Test Document')
-->setSubject('Office 2007 XLSX Test Document')
-->setDescription('Test document for Office 2007 XLSX, generated using PHP classes.')
-->setKeywords('office 2007 openxml php')
-->setCategory('Test result file');
+	public function excel_report()
+	{	
+		$tgl = $this->input->post('tgl');
+		
+		$user = $this->session->userdata('nip');
+		$user_toko = $this->M_stock->select_toko($user)->row()->ID_TOKO_JAGA;
+		$nama_bp = $this->M_stock->select_pegawai($user)->row()->NAMA_PEG;
+		$nama_toko = $this->M_stock->select_nama_toko($user_toko)->row()->NAMA_TOKO;
+		
+		
+		$this->load->library('excel'); 
+	    $objPHPExcel = new PHPExcel();
+        $objPHPExcel->getActiveSheet()->getColumnDimension('A')->setWidth(5);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('B')->setWidth(15);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('C')->setWidth(25);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('D')->setWidth(15);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('E')->setWidth(8);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('F')->setWidth(15);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('G')->setWidth(8);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('H')->setWidth(8);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('I')->setWidth(8);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('J')->setWidth(20);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('K')->setWidth(5);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('L')->setWidth(10);
+        $objPHPExcel->getActiveSheet()->getColumnDimension('M')->setWidth(10);
+        
+        $objPHPExcel->getActiveSheet()->getStyle("B1:B2")->getFont()->setBold(true);
+        
+        $header = array(
+            'alignment' => array(
+                'horizontal' => PHPExcel_Style_Alignment::HORIZONTAL_CENTER,
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            ),
+            'font' => array(
+                'bold' => true,
+            )
+        );
 
-// Add some data
-$spreadsheet->setActiveSheetIndex(0)
-->setCellValue('A1', 'LAPORAN PENJUALAN')
-->setCellValue('A2', 'TANGGAL :'.$tgl)
-->setCellValue('A4', 'NAMA ITEM')
-->setCellValue('B4', 'TERJUAL')
-->setCellValue('C4', 'QTY')
-->setCellValue('D4', 'TOTAL')
-;
+        $noom = array(
+            'alignment' => array(
+                'vertical' => PHPExcel_Style_Alignment::VERTICAL_CENTER,
+            ),
+            'font' => array(
+                'bold' => true,
+            )
+        );
 
-// Miscellaneous glyphs, UTF-8
-$hargatotal = 0 ; $jumlahtotal = 0 ;$total = 0 ;
-$i=5; foreach($cetak as $cetak_detail) {
-	$hargatotal += $cetak_detail->HARGA_JUAL;
-	$jumlahtotal += $cetak_detail->JUMLAH_JUAL;
-	$total += $cetak_detail->JUMLAH_JUAL*$cetak_detail->HARGA_JUAL;
-	$tot = $cetak_detail->JUMLAH_JUAL*$cetak_detail->HARGA_JUAL;
 
-$spreadsheet->setActiveSheetIndex(0)
-->setCellValue('A'.$i, $cetak_detail->ITEM_JUAL)
-->setCellValue('B'.$i, $cetak_detail->HARGA_JUAL)
-->setCellValue('C'.$i, $cetak_detail->JUMLAH_JUAL)
-->setCellValue('D'.$i, $tot);
+        $bulan = array (1 =>   'JANUARI',
+			'FEBRUARI',
+			'MARET',
+			'APRIL',
+			'MEI',
+			'JUNI',
+			'JULI',
+			'AGUSTUS',
+			'SEPTEMBER',
+			'OKTOBER',
+			'NOVEMBER',
+			'DESEMBER'
+		);
 
-$i++;
-}
+		$split = explode('-', $tgl);
 
-// Rename worksheet
-$spreadsheet->getActiveSheet()->setTitle('Report Excel '.date('d-m-Y H'));
+        $objPHPExcel->getActiveSheet()->getStyle("A4:J5")
+                ->applyFromArray($header);
+        $objPHPExcel->getActiveSheet()->getStyle("L6:M6")
+                ->applyFromArray($header);
+        $objPHPExcel->getActiveSheet()->getStyle("L7:M8")
+                ->applyFromArray($noom);
 
-// Set active sheet index to the first sheet, so Excel opens this as the first sheet
-$spreadsheet->setActiveSheetIndex(0);
+        $objPHPExcel->getActiveSheet()->mergeCells('A4:A5');
+        $objPHPExcel->getActiveSheet()->mergeCells('B4:B5');
+        $objPHPExcel->getActiveSheet()->mergeCells('C4:C5');
+        $objPHPExcel->getActiveSheet()->mergeCells('D4:D5');
+        $objPHPExcel->getActiveSheet()->mergeCells('E4:E5');
+        $objPHPExcel->getActiveSheet()->mergeCells('F4:F5');
+        $objPHPExcel->getActiveSheet()->mergeCells('J4:J5');
+        $objPHPExcel->getActiveSheet()->mergeCells('G4:I4');
+        $objPHPExcel->getActiveSheet()->mergeCells('L6:M6');
+        $objPHPExcel->getActiveSheet()->mergeCells('L7:M8');
+        $objPHPExcel->setActiveSheetIndex(0)
+            // ->setCellValue('A1', 'Export Data dengan PHPExcel')
+        	->setCellValue('B1', 'BP')
+            ->setCellValue('B2', 'STORE')
+            ->setCellValue('C1', $nama_bp)
+            ->setCellValue('C2', $nama_toko)
+            ->setCellValue('A4', 'No.')
+            ->setCellValue('B4', 'DATE')
+            ->setCellValue('C4', 'ARTICLE')
+            ->setCellValue('D4', 'PRICE')
+            ->setCellValue('E4', 'QTY')
+            ->setCellValue('F4', 'NETT PRICE')
+            ->setCellValue('G4', 'PEMBAYARAN')
+            ->setCellValue('G5', 'DEBIT')
+            ->setCellValue('H5', 'KREDIT')
+            ->setCellValue('I5', 'CASH')
+            ->setCellValue('J4', 'TOTAL')
+            ->setCellValue('L6', 'NOMINAL');
+        
+        $ex = $objPHPExcel->setActiveSheetIndex(0);
+        
+        $no = 1;
+        $counter = 6;
+        $hasil = 0;
 
-// Redirect output to a client’s web browser (Xlsx)
-header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-header('Content-Disposition: attachment;filename="Report Excel.xlsx"');
-header('Cache-Control: max-age=0');
-// If you're serving to IE 9, then the following may be needed
-header('Cache-Control: max-age=1');
+        $select_tgl_ai = $this->M_excel->select_tanggal($tgl,$user_toko)->result();
+        foreach ($select_tgl_ai as $row) {
+            $ex->setCellValue('A'.$counter, $no++);
+            $ex->setCellValue('B'.$counter, $row->LAPORAN_DATE);
+            $ai_lapor = $row->AI_LAPORAN;
 
-// If you're serving to IE over SSL, then the following may be needed
-header('Expires: Mon, 26 Jul 1997 05:00:00 GMT'); // Date in the past
-header('Last-Modified: ' . gmdate('D, d M Y H:i:s') . ' GMT'); // always modified
-header('Cache-Control: cache, must-revalidate'); // HTTP/1.1
-header('Pragma: public'); // HTTP/1.0
+            $select_isi = $this->M_excel->isi($ai_lapor)->result();
+            foreach ($select_isi as $key) {
+            	$kode_brg = $key->ITEM_JUAL;
+            	$select_nama = $this->M_item->select_nama($kode_brg)->row()->NAMA_ITEM;
+            	$ex->setCellValue('C'.$counter, $select_nama);
+            	$price = $key->HARGA_JUAL;
+            	$ex->setCellValue('D'.$counter, $price);
+            	$qty = $key->JUMLAH_JUAL;
+            	$ex->setCellValue('E'.$counter, $qty);
+            	$ex->setCellValue('F'.$counter, $price);
+            	$total = $price * $qty;
+            	$ex->setCellValue('J'.$counter, $total);
+            	$hasil = $hasil + $total;
+            	$counter++;
+            }
 
-$writer = IOFactory::createWriter($spreadsheet, 'Xlsx');
-$writer->save('php://output');
-exit;
+            $ex->setCellValue('J'.$counter, "-");
+            $counter++;
+        }
+
+        $objPHPExcel->setActiveSheetIndex(0)
+            ->setCellValue('L7', $hasil);
+        
+        $batas = $counter - 1;
+        
+        // KASIH CURRENCY
+
+        $objPHPExcel->getActiveSheet()->getStyle('D6:D'.$batas)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        $objPHPExcel->getActiveSheet()->getStyle('F6:F'.$batas)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        $objPHPExcel->getActiveSheet()->getStyle('J6:J'.$batas)->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+        $objPHPExcel->getActiveSheet()->getStyle('L7')->getNumberFormat()->setFormatCode(PHPExcel_Style_NumberFormat::FORMAT_NUMBER_COMMA_SEPARATED1);
+
+        // KASIH FILL
+
+        $objPHPExcel->getSheet(0)->getStyle('A4:J5')->getFill()
+			->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+		$objPHPExcel->getSheet(0)->getStyle('A4:J5')->getFill()
+			->getStartColor()->setRGB('FFD700');
+
+		$objPHPExcel->getSheet(0)->getStyle('B2:C2')->getFill()
+			->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+		$objPHPExcel->getSheet(0)->getStyle('B2:C2')->getFill()
+			->getStartColor()->setRGB('808000');
+			
+		$objPHPExcel->getSheet(0)->getStyle('B1:C1')->getFill()
+			->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+		$objPHPExcel->getSheet(0)->getStyle('B1:C1')->getFill()
+			->getStartColor()->setRGB('BDB76B');
+
+		$select_tgl_ai = $this->M_excel->select_tanggal($tgl,$user_toko)->row();
+		if ($select_tgl_ai != NULL) {
+				$objPHPExcel->getSheet(0)->getStyle('J6:J'.$batas)->getFill()
+					->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+				$objPHPExcel->getSheet(0)->getStyle('J6:J'.$batas)->getFill()
+					->getStartColor()->setRGB('FFA07A');
+			}
+		$objPHPExcel->getSheet(0)->getStyle('L6:M6')->getFill()
+			->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+		$objPHPExcel->getSheet(0)->getStyle('L6:M6')->getFill()
+			->getStartColor()->setRGB('6B8E23');
+
+		$objPHPExcel->getSheet(0)->getStyle('L7:M8')->getFill()
+			->setFillType(PHPExcel_Style_Fill::FILL_SOLID);
+		$objPHPExcel->getSheet(0)->getStyle('L7:M8')->getFill()
+			->getStartColor()->setRGB('90EE90');	
+
+		// KASIH BORDER
+		
+		$objPHPExcel->getSheet(0)->getStyle('A4:J'.$batas)->getBorders()
+			->getAllBorders()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+		$objPHPExcel->getSheet(0)->getStyle('A4:J'.$batas)->getBorders()
+			->getAllBorders()->getColor()->setRGB('000000');
+
+		$objPHPExcel->getSheet(0)->getStyle('L6:M8')->getBorders()
+			->getAllBorders()->setBorderStyle(PHPExcel_Style_Border::BORDER_THIN);
+		$objPHPExcel->getSheet(0)->getStyle('L6:M8')->getBorders()
+			->getAllBorders()->getColor()->setRGB('000000');
+
+
+        
+        $objPHPExcel->getProperties()->setCreator("Ismo Broto")
+            ->setLastModifiedBy("Ismo Broto")
+            ->setTitle("Export PHPExcel Test Document")
+            ->setSubject("Export PHPExcel Test Document")
+            ->setDescription("Test doc for Office 2007 XLSX, generated by PHPExcel.")
+            ->setKeywords("office 2007 openxml php")
+            ->setCategory("PHPExcel");
+        $objPHPExcel->getActiveSheet()->setTitle($bulan[ (int)$split[1] ] . ' ' . $split[0].'(SELL OUT)');
+        
+        $objWriter  = PHPExcel_IOFactory::createWriter($objPHPExcel, 'Excel2007');
+        header('Last-Modified:'. gmdate("D, d M Y H:i:s").'GMT');
+        header('Chace-Control: no-store, no-cache, must-revalation');
+        header('Chace-Control: post-check=0, pre-check=0', FALSE);
+        header('Pragma: no-cache');
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="Sellout'. date('Ymd') .'.xlsx"');
+        
+        $objWriter->save('php://output');
+       
+	}
+
+	public function report_view()
+	{
+		$tgl = $this->input->post('tgl');
+		$user = $this->session->userdata('nip');
+		$user_toko = $this->M_stock->select_toko($user)->row()->ID_TOKO_JAGA;
+		$nama_bp = $this->M_stock->select_pegawai($user)->row()->NAMA_PEG;
+		$nama_toko = $this->M_stock->select_nama_toko($user_toko)->row()->NAMA_TOKO;
+
+		$data['select_tgl_ai'] = $this->M_excel->select_tanggal($tgl,$user_toko)->result();
+
+		$data['content'] = 'bp/view_monthly_report2';
+		$this->load->view('template', $data);
 	}
 
 }
